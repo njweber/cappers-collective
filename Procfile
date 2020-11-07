@@ -1,1 +1,1 @@
-web: gunicorn cappers_collective.wsgi --log-file -
+web: python cappers_collective/manage.py runserver 192.168.1.254:$PORT
