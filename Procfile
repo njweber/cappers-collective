@@ -1,1 +1,1 @@
-web: python cappers_collective/manage.py runserver 192.168.1.254:$PORT
+web: python manage.py runserver 192.168.1.254:$PORT
