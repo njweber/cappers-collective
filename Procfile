@@ -1,1 +1,1 @@
-web: gunicorn mysite.wsgi --log-file - 
+web: gunicorn cappers-collective.wsgi --log-file - 
