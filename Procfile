@@ -1,2 +1,2 @@
 web: gunicorn cappers_collective.wsgi
-web: python manage.py runserver localhost:8000
+worker: python manage.py runserver localhost:8000
