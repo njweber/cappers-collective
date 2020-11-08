@@ -19,6 +19,7 @@ from main_app import views
 
 urlpatterns = [
     url('admin/', admin.site.urls),
+    url('admin/crawl', admin.site.urls),
     url('$', views.main, name='main'),
 
 ]
