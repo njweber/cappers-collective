@@ -9,6 +9,7 @@ connect = psycopg2.connect(
 cursor = connect.cursor()
 
 def save_tweet(user, date, text, url):
-    cursor.execute('INSERT INTO tweet (user, date, text, url) VALUES (?, ?, ?, ?)', (user, date, text, url))
+    #cursor.execute("INSERT INTO tweet (user, date, text, url) VALUES ('testuser',%s, %s, %s)", (date, text, url))
+    print(cursor.execute("SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tweet'"))
     connect.commit()
     return "Tweet Saved"

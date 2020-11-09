@@ -18,7 +18,9 @@ from django.conf.urls import url
 from main_app import views
 
 urlpatterns = [
-    url('admin/', admin.site.urls),
-    url('home/', views.main, name='main'),
+    url(r'^admin/', admin.site.urls),
+    url(r'^home/', views.main, name='main'),
+    url(r'^admin/crawl/', views.button_crawl_twitter, name='crawl_twitter_script'),
+
 
 ]
