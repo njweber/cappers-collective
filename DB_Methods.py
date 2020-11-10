@@ -8,7 +8,7 @@ connect = psycopg2.connect(
 
 cursor = connect.cursor()
 
-def save_tweet(user, date, text, url):
-    cursor.execute("INSERT INTO tweet (user, date, text, url) VALUES (%s, %s, %s, %s)", (user, date, text, url))
+def save_tweet(date, name, text, url):
+    cursor.execute("INSERT INTO tweets_all (date, name, text, url) VALUES (%s, %s, %s, %s)", (date, name, text, url))
     connect.commit()
     return "Tweet Saved"

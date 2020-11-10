@@ -12,10 +12,10 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 import django_heroku
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -78,11 +78,14 @@ WSGI_APPLICATION = 'cappers_collective.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'cappers_db.sqlite3',
-    }
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'd1acr589hq47f4',
+        'USER': 'jlkghpyceaceaj',
+        'PASSWORD': '5d3ff149d535057886dfd52ac85888eb2f28f2ba34c5f36b46429d99720f7f36',
+        'HOST': 'ec2-54-82-208-124.compute-1.amazonaws.com',
+        'PORT': '',
+    }   
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

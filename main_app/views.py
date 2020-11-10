@@ -13,6 +13,9 @@ def main(request):
    return render(request, "../templates/main.html", {})
 
 def button_crawl_twitter(request):
+   if not request.user.is_authenticated:
+        return render(request, "../templates/admin/login.html", {})
+
    auth = tweepy.OAuthHandler(Private.TWITTER_API_KEY, Private.TWITTER_API_SECRET)
    auth.set_access_token(Private.TWITTER_KEY, Private.TWITTER_SECRET)
    api = tweepy.API(auth)
@@ -20,10 +23,11 @@ def button_crawl_twitter(request):
    public_tweet = api.user_timeline("thecheeze222")[1]
    text = public_tweet.text
    date = public_tweet.created_at
-   user = public_tweet.user.screen_name   
-   result = DB_Methods.save_tweet(user, date, text, "TWITTER.COM")
+   name = public_tweet.user.screen_name  
+   url = public_tweet.id 
+   result = DB_Methods.save_tweet(date, name, text, url)
    print(result)
-   return render(request, "../templates/main.html", {})
+   return render(request, "../templates/admin/crawl.html", {})
    
 def crawl_twitter_output(request):
    data = "Success"
