@@ -9,10 +9,10 @@ def start_crawl():
     api = tweepy.API(auth)
 
     #Will need to loop over users here and save tweets that are valid data
-    public_tweet = api.user_timeline("thecheeze222")[1]
-    text = public_tweet.text
-    date = public_tweet.created_at
-    name = public_tweet.user.screen_name  
-    url = public_tweet.id 
+    tweet = api.user_timeline("thecheeze222")[1]
+    date = tweet.created_at
+    name = tweet.user.screen_name  
+    text = tweet.text
+    url = "https://twitter.com/" + name + "/statuses/" + str(tweet.id) 
     DB_Methods.save_tweet(date, name, text, url)
     return
