@@ -5,5 +5,5 @@ from .models import tweets_all
 
 @admin.register(tweets_all)
 class tweet_admin(admin.ModelAdmin):
-    list_display = ['id','user','date','text','url']
+    list_display = ['id','date','name','text','url']
 
