@@ -1,10 +1,10 @@
 from django.db import models
 
 # Create your models here.
-class tweet(models.Model):
-    user = models.TextField(max_length= 50)
+class tweets_all(models.Model):
     date = models.DateField()
+    user = models.TextField(max_length= 50)
     text = models.TextField()
     url = models.TextField()
     class Meta:
-        db_table = "tweet"
+        db_table = "tweets_all"

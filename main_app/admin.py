@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import tweet
+from .models import tweets_all
 
 @admin.register(tweet)
 class tweet_admin(admin.ModelAdmin):
