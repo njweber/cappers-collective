@@ -3,7 +3,7 @@ from django.db import models
 # Create your models here.
 class tweets_all(models.Model):
     date = models.DateField()
-    user = models.TextField(max_length= 50)
+    name = models.TextField(max_length= 50)
     text = models.TextField()
     url = models.TextField()
     class Meta:
