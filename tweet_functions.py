@@ -1,7 +1,6 @@
 import tweepy
 import Private
 import DB_Methods
-import emoji
 from datetime import datetime
 
 def start_crawl():
@@ -39,6 +38,6 @@ def start_crawl():
 # Determines if the tweet is a bet tweet depending on user
 def is_user_specific_bet(user, text):
     if(user == "thecheeze222"):
-        if("🏀" in text):
+        if("🏀" in text or "🏈" in text):
             return True
     return
