@@ -1,6 +1,7 @@
 import tweepy
 import Private
 import DB_Methods
+import emoji
 from datetime import datetime
 
 def start_crawl():
@@ -20,13 +21,24 @@ def start_crawl():
             today = str(datetime.today())[0 : 10]
             if(tweet_date == today): #Tweet from today!
                 tweet_num = tweet_num + 1
-                #TODO: Check to verify if tweet is a bet tweet
                 date = tweet.created_at
                 name = tweet.user.screen_name  
                 text = tweet.text
                 url = "https://twitter.com/" + name + "/statuses/" + str(tweet.id) 
-                DB_Methods.save_tweet(date, name, text, url)
+
+
+
+                #TODO: Check to verify if tweet is a bet tweet
+                if(is_user_specific_bet(users[user_num], text)):
+                    DB_Methods.save_tweet(date, name, text, url)
             else:
                 tweet_num = 0
                 flag = True #Not a tweet from today so go to next user  
+    return
+
+# Determines if the tweet is a bet tweet depending on user
+def is_user_specific_bet(user, text):
+    if(user == "thecheeze222"):
+        if("🏀" in text):
+            return True
     return
