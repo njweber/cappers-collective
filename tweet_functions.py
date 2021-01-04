@@ -1,7 +1,6 @@
 import tweepy
 import Private
 import DB_Methods
-import schedule
 import time
 from datetime import datetime
 
