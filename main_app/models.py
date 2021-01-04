@@ -8,3 +8,11 @@ class tweets_all(models.Model):
     url = models.TextField()
     class Meta:
         db_table = "tweets_all"
+
+class tweets_bets(models.Model):
+    date = models.DateField()
+    name = models.TextField(max_length= 50)
+    text = models.TextField()
+    url = models.TextField()
+    class Meta:
+        db_table = "tweets_bets"

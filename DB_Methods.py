@@ -8,7 +8,19 @@ connect = psycopg2.connect(
 
 cursor = connect.cursor()
 
-def save_tweet(date, name, text, url):
+def save_bet_tweet(date, name, text, url):
+    cursor.execute("INSERT INTO tweets_bets (date, name, text, url) VALUES (%s, %s, %s, %s)", (date, name, text, url))
+    connect.commit()
+    return 1
+
+def save_all_tweet(date, name, text, url):
     cursor.execute("INSERT INTO tweets_all (date, name, text, url) VALUES (%s, %s, %s, %s)", (date, name, text, url))
     connect.commit()
-    return "Tweet Saved"
+    return 1
+
+def check_dupe_tweets(id):
+    
+    if(cursor.execute("SELECT id FROM tweets_all WHERE id = 41")):
+        print("YES")
+        #return True
+    return False

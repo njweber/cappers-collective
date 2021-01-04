@@ -1,8 +1,12 @@
 import tweepy
 import Private
 import DB_Methods
+import schedule
+import time
 from datetime import datetime
 
+
+#Crawls twitter for tweets. Saving to DB when tweet is a betting tweet. Also checks for duplicates.
 def start_crawl():
     #Initialize Authentication for Twitter API and Tweepy
     auth = tweepy.OAuthHandler(Private.TWITTER_API_KEY, Private.TWITTER_API_SECRET)
@@ -10,7 +14,7 @@ def start_crawl():
     api = tweepy.API(auth)
     
     #Loop over users here and save tweets that are valid data
-    users = ["thecheeze222"] #Pull this from DB later
+    users = ["thecheeze222"] #TODO: Pull this from DB later
     for user_num in range(len(users)):
         flag = False
         tweet_num = 0
@@ -25,11 +29,11 @@ def start_crawl():
                 text = tweet.text
                 url = "https://twitter.com/" + name + "/statuses/" + str(tweet.id) 
 
-
-
-                #TODO: Check to verify if tweet is a bet tweet
-                if(is_user_specific_bet(users[user_num], text)):
-                    DB_Methods.save_tweet(date, name, text, url)
+                #TODO: Add duplicate check before saving to DB.
+                if(DB_Methods.check_dupe_tweets(id)):
+                    DB_Methods.save_all_tweet(date, name, text, url)
+                    if(is_user_specific_bet(users[user_num], text)):
+                        DB_Methods.save_bet_tweet(date, name, text, url)
             else:
                 tweet_num = 0
                 flag = True #Not a tweet from today so go to next user  
@@ -40,4 +44,18 @@ def is_user_specific_bet(user, text):
     if(user == "thecheeze222"):
         if("🏀" in text or "🏈" in text):
             return True
-    return
+    return False
+
+
+
+
+
+
+#RUN the crawl script automatically
+#schedule.every().day.at("12:00").do(start_crawl)
+
+#while True:
+   # schedule.run_pending()
+   # time.sleep(5)
+#END run crawl script automatically
+
