@@ -53,7 +53,7 @@ INSTALLED_APPS = [
 #    }
 #}
 
-CELERY_BROKER_URL = 'amqp://localhost'
+#CELERY_BROKER_URL = 'amqp://localhost'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
