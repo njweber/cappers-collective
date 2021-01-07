@@ -14,7 +14,7 @@ from pathlib import Path
 import django_heroku
 import dj_database_url
 import os
-from celery.schedules import crontab    
+#from celery.schedules import crontab    
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -45,13 +45,13 @@ INSTALLED_APPS = [
     
 ]
 
-CELERY_BEAT_SCHEDULE = {
- 'start_crawl_every_four_hours': {
-       'task': 'periodic_task_crawl',
-       'schedule': crontab(minute='*/15'),
-       'args': (''),
-    }
-}
+#CELERY_BEAT_SCHEDULE = {
+# 'start_crawl_every_four_hours': {
+#       'task': 'periodic_task_crawl',
+#       'schedule': crontab(minute='*/15'),
+#       'args': (''),
+#    }
+#}
 
 CELERY_BROKER_URL = 'amqp://localhost'
 
