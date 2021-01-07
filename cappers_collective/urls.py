@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.conf.urls import url
-from main_app import views
+from tweet_crawler import views
 
 urlpatterns = [
     url(r'^$', views.main, name='main'),

@@ -19,8 +19,8 @@ def save_all_tweet(date, name, text, url):
     return 1
 
 def check_dupe_tweets(id):
-    
+    #TODO: Fix duplicate checking
     if(cursor.execute("SELECT id FROM tweets_all WHERE id = 41")):
         print("YES")
         #return True
-    return False
+    return True
