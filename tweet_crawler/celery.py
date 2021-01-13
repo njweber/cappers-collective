@@ -1,3 +1,6 @@
+#https://www.merixstudio.com/blog/django-celery-beat/
+
+
 import os
 #from celery import Celery
 #from celery.schedules import crontab

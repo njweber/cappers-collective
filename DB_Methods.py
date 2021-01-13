@@ -24,3 +24,10 @@ def check_dupe_tweets(id):
         print("YES")
         #return True
     return True
+
+def get_user_list():
+    print(cursor.execute("SELECT * FROM twitter_users"))
+        
+        
+    return 1 
+    
