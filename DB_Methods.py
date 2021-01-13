@@ -8,26 +8,27 @@ connect = psycopg2.connect(
 
 cursor = connect.cursor()
 
-def save_bet_tweet(date, name, text, url):
-    cursor.execute("INSERT INTO tweets_bets (date, name, text, url) VALUES (%s, %s, %s, %s)", (date, name, text, url))
+def save_bet_tweet(date, name, text, url, status_id):
+    cursor.execute("INSERT INTO tweets_bets (date, name, text, url, status_id) VALUES (%s, %s, %s, %s, %s)", (date, name, text, url, status_id))
     connect.commit()
     return 1
 
-def save_all_tweet(date, name, text, url):
-    cursor.execute("INSERT INTO tweets_all (date, name, text, url) VALUES (%s, %s, %s, %s)", (date, name, text, url))
+def save_all_tweet(date, name, text, url, status_id):
+    cursor.execute("INSERT INTO tweets_all (date, name, text, url, status_id) VALUES (%s, %s, %s, %s, %s)", (date, name, text, url, status_id))
     connect.commit()
     return 1
 
 def check_dupe_tweets(id):
-    #TODO: Fix duplicate checking
-    if(cursor.execute("SELECT id FROM tweets_all WHERE id = 41")):
-        print("YES")
-        #return True
-    return True
+    cursor.execute("SELECT * FROM tweets_all")
+    for row in cursor:
+        if(row[5] == id):
+            return True
+    return False
 
 def get_user_list():
-    print(cursor.execute("SELECT * FROM twitter_users"))
-        
-        
-    return 1 
+    cursor.execute("SELECT * FROM twitter_users")
+    users = []
+    for row in cursor:
+        users.append(row[1])
+    return users 
     
