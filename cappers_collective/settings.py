@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     #'django_celery_beat',
     'django.contrib.staticfiles',
     'tweet_crawler'
-    
 ]
 
 #CELERY_BEAT_SCHEDULE = {
