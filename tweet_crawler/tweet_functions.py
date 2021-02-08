@@ -1,10 +1,8 @@
 import tweepy
+import time
 import Private
 import DB_Methods
-import time
 from datetime import datetime  
-
-#TODO: Crawl site daily! Possibly use celery.
 
 #Crawls twitter for tweets. Saving to DB when tweet is a betting tweet. Also checks for duplicates.
 def start_crawl():
@@ -35,6 +33,7 @@ def start_crawl():
                     DB_Methods.save_all_tweet(date, name, text, url, status_id)
                     if(is_user_specific_bet(users[user_num], text)):
                         DB_Methods.save_bet_tweet(date, name, text, url, status_id)
+                        parse_raw_text_bet_data(date, name, text, url)
             else:
                 tweet_num = 0
                 flag = True #Not a tweet from today so go to next user  
@@ -47,3 +46,40 @@ def is_user_specific_bet(user, text):
         if(model in text):
             return True
     return False
+
+# Parse Raw Text Bet Data
+def parse_raw_text_bet_data(date, name, text, url):
+    capper = name
+    date = date 
+    url = url
+    league = parse_league()
+    week = parse_week(date)
+    bet_type = parse_bet_type()
+    units = parse_units()
+    odds = parse_odds()
+    result = parse_result()
+    unit_calc = parse_unit_calc()
+    return #DB_Methods.save_parsed_bet_data(capper, league, week, date, bet_type, units, odds, result, unit_calc, url)
+    
+
+def parse_league():
+    return ""
+    
+#DONE: Returns the week of the year
+def parse_week(date):
+    return date.strftime("%V")
+
+def parse_bet_type():
+    return ""
+
+def parse_units():
+    return ""
+
+def parse_odds():
+    return ""
+
+def parse_result():
+    return ""
+
+def parse_unit_calc():
+    return ""

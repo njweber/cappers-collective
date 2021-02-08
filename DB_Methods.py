@@ -18,6 +18,12 @@ def save_all_tweet(date, name, text, url, status_id):
     connect.commit()
     return 1
 
+def save_parsed_bet_data(capper, league, week, date, bet_type, units, odds, result, unit_calc, url):
+    cursor.execute("INSERT INTO parsed_data (capper, league, week, date, bet_type, units, odds, result, unit_calc, url) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (capper, league, week, date, bet_type, units, odds, result, unit_calc, url))
+    connect.commit()
+    return 1
+
+
 def check_dupe_tweets(id):
     cursor.execute("SELECT * FROM tweets_all")
     for row in cursor:
