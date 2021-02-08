@@ -8,7 +8,6 @@ from datetime import datetime
 
 #Crawls twitter for tweets. Saving to DB when tweet is a betting tweet. Also checks for duplicates.
 def start_crawl():
-    print("Crawling!")
     #Initialize Authentication for Twitter API and Tweepy
     auth = tweepy.OAuthHandler(Private.TWITTER_API_KEY, Private.TWITTER_API_SECRET)
     auth.set_access_token(Private.TWITTER_KEY, Private.TWITTER_SECRET)
@@ -43,9 +42,8 @@ def start_crawl():
 
 # Determines if the tweet is a bet tweet depending on user
 def is_user_specific_bet(user, text):
-    if(user == "thecheeze222"):
-        if("🏀" in text or "🏈" in text):
+    models = DB_Methods.get_bet_models_by_user(user)
+    for model in models:
+        if(model in text):
             return True
-    if(user == ""):
-        return True
     return False

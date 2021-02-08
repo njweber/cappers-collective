@@ -23,3 +23,9 @@ class twitter_users(models.Model):
     name = models.TextField(max_length= 50)
     class Meta:
         db_table = "twitter_users"
+
+class tweet_models(models.Model):
+    user = models.CharField(max_length= 50)
+    model = models.CharField(max_length= 50)
+    class Meta:
+        db_table = "tweet_models"

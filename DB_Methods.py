@@ -32,3 +32,10 @@ def get_user_list():
         users.append(row[1])
     return users 
     
+def get_bet_models_by_user(user):
+    cursor.execute("SELECT * FROM tweet_models")
+    models = []
+    for row in cursor:
+        if (row[1] == user):
+            models.append(row[2])
+    return models 
