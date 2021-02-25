@@ -12,7 +12,6 @@ def start_crawl():
     api = tweepy.API(auth)
     
     #Loop over users here and save tweets that are valid data
-    
     users = DB_Methods.get_user_list() #Pull list of users from the database
     for user_num in range(len(users)):
         flag = False
@@ -28,10 +27,10 @@ def start_crawl():
                 text = tweet.text
                 url = "https://twitter.com/" + name + "/statuses/" + str(tweet.id)
                 status_id = tweet.id 
-
+                models = DB_Methods.get_bet_models_by_user(users[user_num])
                 if(not DB_Methods.check_dupe_tweets(status_id)):
                     DB_Methods.save_all_tweet(date, name, text, url, status_id)
-                    if(is_user_specific_bet(users[user_num], text)):
+                    if(is_user_specific_bet(text, models)):
                         DB_Methods.save_bet_tweet(date, name, text, url, status_id)
                         parse_raw_text_bet_data(date, name, text, url)
             else:
@@ -40,21 +39,21 @@ def start_crawl():
     return
 
 # Determines if the tweet is a bet tweet depending on user
-def is_user_specific_bet(user, text):
-    models = DB_Methods.get_bet_models_by_user(user)
+def is_user_specific_bet(text, models):
     for model in models:
         if(model in text):
             return True
     return False
 
-# Parse Raw Text Bet Data
+# Parse Raw Text Bet Data 
+#TODO: Parse bet data into individual fields
 def parse_raw_text_bet_data(date, name, text, url):
     capper = name
     date = date 
     url = url
     league = parse_league()
     week = parse_week(date)
-    bet_type = parse_bet_type()
+    bet_type = parse_bet_type(text)
     units = parse_units()
     odds = parse_odds()
     result = parse_result()
@@ -64,13 +63,32 @@ def parse_raw_text_bet_data(date, name, text, url):
 
 def parse_league():
     return ""
-    
-#DONE: Returns the week of the year
+
 def parse_week(date):
     return date.strftime("%V")
 
-def parse_bet_type():
-    return ""
+def parse_bet_type(text):
+    split = text.split(' ')
+    print(split)
+    
+    if():
+        #Spread bet
+        return "SP"
+    if():
+        #Over under bet  
+        return "OU"  
+    if():
+        #Money line bet
+        return "ML"
+    if(): 
+        #Player prop bet
+        return "PR"
+    if():
+        #Teaser bet
+        return "TS"
+    if():
+        #Parlay bet
+        return "PARLAY"
 
 def parse_units():
     return ""
