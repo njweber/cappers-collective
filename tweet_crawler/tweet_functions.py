@@ -51,29 +51,44 @@ def parse_raw_text_bet_data(date, name, text, url):
     capper = name
     date = date 
     url = url
-    league = parse_league()
+    league = parse_league(text)
     week = parse_week(date)
     bet_type = parse_bet_type(text)
     units = parse_units()
     odds = parse_odds()
     result = parse_result()
     unit_calc = parse_unit_calc()
-    return #DB_Methods.save_parsed_bet_data(capper, league, week, date, bet_type, units, odds, result, unit_calc, url)
+    return DB_Methods.save_parsed_bet_data(capper, league, week, date, bet_type, units, odds, result, unit_calc, url, text)
     
 
-def parse_league():
-    return ""
+def parse_league(text):
+    if("basketball" in text):
+        #either nba or ncaab
+        return "NBA"
+    if("football" in text):
+        #either nfl or ncaaf
+        return "NFL"
+    if("baseball" in text):
+        #only mlb? or do people bet on college baseball?
+        return "MLB"
+    return "UNKNOWN"
 
+#DONE
 def parse_week(date):
     return date.strftime("%V")
 
 def parse_bet_type(text):
     split = text.split(' ')
-    print(split)
-    
-    if():
-        #Spread bet
-        return "SP"
+    for snips in split:
+        print(snips)
+        try: #Spread bet
+            flag = int(snips) < 100 and int(snips) > -100 
+            print(flag)
+        except:
+            break #Not a valid data type
+        if (flag is True):
+            print("Spread!")
+            return "SP"
     if():
         #Over under bet  
         return "OU"  
@@ -89,15 +104,16 @@ def parse_bet_type(text):
     if():
         #Parlay bet
         return "PARLAY"
+    return "UNKNOWN"
 
 def parse_units():
-    return ""
+    return 1
 
 def parse_odds():
-    return ""
+    return -110
 
 def parse_result():
-    return ""
+    return "W"
 
 def parse_unit_calc():
-    return ""
+    return 0.90
