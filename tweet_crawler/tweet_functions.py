@@ -2,7 +2,19 @@ import tweepy
 import time
 import Private
 import DB_Methods
-from datetime import datetime  
+from dateutil import tz
+from datetime import datetime
+
+#DONE: Fix not all users pulled
+#DONE: Allow toggling users data pull
+#DONE: Fix run daily
+#DONE: Clear tables for testing
+#DONE: Fix time thingy was pulling UTC?? WHYYY
+#TODO: Split single/mult bet tweet into seperate items
+#TODO: Add times of tweet not just the date
+#TODO: Continue league and bet type parsing
+#TODO: Look into excel archiving 
+
 
 #Crawls twitter for tweets. Saving to DB when tweet is a betting tweet. Also checks for duplicates.
 def start_crawl():
@@ -12,13 +24,19 @@ def start_crawl():
     api = tweepy.API(auth)
     
     #Loop over users here and save tweets that are valid data
-    users = DB_Methods.get_user_list() #Pull list of users from the database
+    users = []
+    users_all = DB_Methods.get_user_list() #Pull list of users from the database
+    for u in users_all:
+        if(u[2] == True):
+            users.append(u[1])
     for user_num in range(len(users)):
         flag = False
         tweet_num = 0
         while (flag == False):
             tweet = api.user_timeline(users[user_num])[tweet_num]
-            tweet_date = str(tweet.created_at)[0 : 10]
+            tweet_date = tweet.created_at
+            tweet_date = tweet_date.replace(tzinfo=tz.gettz('UTC'))
+            tweet_date = str(tweet_date.astimezone(tz.gettz('Eastern Time Zone')))[0 : 10]
             today = str(datetime.today())[0 : 10]
             if(tweet_date == today): #Tweet from today!
                 tweet_num = tweet_num + 1
@@ -80,10 +98,10 @@ def parse_week(date):
 def parse_bet_type(text):
     split = text.split(' ')
     for snips in split:
-        print(snips)
+        #print(snips)
         try: #Spread bet
             flag = int(snips) < 100 and int(snips) > -100 
-            print(flag)
+            #print(flag)
         except:
             break #Not a valid data type
         if (flag is True):
@@ -113,7 +131,10 @@ def parse_odds():
     return -110
 
 def parse_result():
-    return "W"
+    return "-"
 
 def parse_unit_calc():
     return 0.90
+
+def drop_tables():
+    DB_Methods.drop_tables()

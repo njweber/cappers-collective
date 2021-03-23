@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^$', views.main, name='main'),
     url(r'^admin/', admin.site.urls, name="admin"),
     url(r'^admin/crawl/', views.button_crawl_twitter, name='crawl_twitter_script'),
+    url(r'^admin/drop/', views.button_drop_tables, name='drop_tables'),
 
 
 ]

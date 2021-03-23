@@ -20,7 +20,8 @@ class tweets_bets(models.Model):
         db_table = "tweets_bets"
 
 class twitter_users(models.Model):
-    name = models.TextField(max_length= 50)
+    name = models.CharField(max_length= 70)
+    enabled = models.BooleanField()
     class Meta:
         db_table = "twitter_users"
 

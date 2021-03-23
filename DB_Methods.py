@@ -35,7 +35,7 @@ def get_user_list():
     cursor.execute("SELECT * FROM twitter_users")
     users = []
     for row in cursor:
-        users.append(row[1])
+        users.append(row)
     return users 
     
 def get_bet_models_by_user(user):
@@ -45,3 +45,11 @@ def get_bet_models_by_user(user):
         if (row[1] == user):
             models.append(row[2])
     return models 
+
+#This will be deleted eventually!
+def drop_tables():
+    cursor.execute("DELETE FROM tweets_all")
+    cursor.execute("DELETE FROM tweets_bets")
+    cursor.execute("DELETE FROM parsed_data")
+    connect.commit()
+    return 1

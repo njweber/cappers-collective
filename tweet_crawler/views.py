@@ -18,3 +18,9 @@ def button_crawl_twitter(request):
 def crawl_twitter_output(request):
    data = "Success"
    return render(request, "../templates/home.html", {'data':data})
+
+def button_drop_tables(request):
+   if not request.user.is_authenticated:
+        return render(request, "../templates/admin/login.html", {})
+   tweet_functions.drop_tables()
+   return render(request, "../templates/admin/drop.html", {})

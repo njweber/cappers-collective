@@ -17,7 +17,7 @@ class tweet_bets_admin(admin.ModelAdmin):
 
 @admin.register(twitter_users)
 class twitter_users_admin(admin.ModelAdmin):
-    list_display = ['name']
+    list_display = ['name', 'enabled']
 
 @admin.register(tweet_models)
 class tweet_model(admin.ModelAdmin):
