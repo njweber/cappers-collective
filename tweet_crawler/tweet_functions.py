@@ -5,16 +5,11 @@ import DB_Methods
 from dateutil import tz
 from datetime import datetime
 
-#DONE: Fix not all users pulled
-#DONE: Allow toggling users data pull
-#DONE: Fix run daily
-#DONE: Clear tables for testing
-#DONE: Fix time thingy was pulling UTC?? WHYYY
-#TODO: Split single/mult bet tweet into seperate items
-#TODO: Add times of tweet not just the date
+#TODO: Look into protect/private account pulling
+#In Progress: Split single/mult bet tweet into seperate items
+#DONE: Add times of tweet not just the date
 #TODO: Continue league and bet type parsing
 #TODO: Look into excel archiving 
-
 
 #Crawls twitter for tweets. Saving to DB when tweet is a betting tweet. Also checks for duplicates.
 def start_crawl():
@@ -41,16 +36,18 @@ def start_crawl():
             if(tweet_date == today): #Tweet from today!
                 tweet_num = tweet_num + 1
                 date = tweet.created_at
+                time_date = date.replace(tzinfo=tz.gettz('UTC'))
+                time = time_date.astimezone(tz.gettz('Eastern Time Zone')).strftime("%I:%M:%S %p")
                 name = tweet.user.screen_name  
                 text = tweet.text
                 url = "https://twitter.com/" + name + "/statuses/" + str(tweet.id)
                 status_id = tweet.id 
                 models = DB_Methods.get_bet_models_by_user(users[user_num])
                 if(not DB_Methods.check_dupe_tweets(status_id)):
-                    DB_Methods.save_all_tweet(date, name, text, url, status_id)
+                    DB_Methods.save_all_tweet(date, time, name, text, url, status_id)
                     if(is_user_specific_bet(text, models)):
-                        DB_Methods.save_bet_tweet(date, name, text, url, status_id)
-                        parse_raw_text_bet_data(date, name, text, url)
+                        DB_Methods.save_bet_tweet(date, time, name, text, url, status_id)
+                        parse_raw_text_bet_data(date, time, name, text, url)
             else:
                 tweet_num = 0
                 flag = True #Not a tweet from today so go to next user  
@@ -64,34 +61,45 @@ def is_user_specific_bet(text, models):
     return False
 
 # Parse Raw Text Bet Data 
-#TODO: Parse bet data into individual fields
-def parse_raw_text_bet_data(date, name, text, url):
-    capper = name
-    date = date 
-    url = url
-    league = parse_league(text)
-    week = parse_week(date)
-    bet_type = parse_bet_type(text)
-    units = parse_units()
-    odds = parse_odds()
-    result = parse_result()
-    unit_calc = parse_unit_calc()
-    return DB_Methods.save_parsed_bet_data(capper, league, week, date, bet_type, units, odds, result, unit_calc, url, text)
+def parse_raw_text_bet_data(date, time, name, text, url):
+    #How to handle different number of lines?
+    #Make sure to take into account how to handle single bet with multiple lines 
+    lines = text.splitlines()
+    for line in lines:
+        if (True): #Is it a bet line?
+            capper = name #Same
+            date = date #Same
+            time = time #Same   
+            url = url #Same
+            week = parse_week(date) #Same
+
+            #These variables will be independent to each bet line
+            league = parse_league(text)  #Potentially Different
+            bet_type = parse_bet_type(text) #Potentially Different
+            units = parse_units() #Potentially Different
+            odds = parse_odds() #Potentially Different
+            result = parse_result() #Different
+            unit_calc = parse_unit_calc() #Potentially Different
+            DB_Methods.save_parsed_bet_data(capper, league, week, date, time, bet_type, units, odds, result, unit_calc, url, text)
+    return
     
 
 def parse_league(text):
     if("basketball" in text):
         #either nba or ncaab
+        #if the line text contains NBA team name or location is NBA
+        #else is a college
         return "NBA"
     if("football" in text):
         #either nfl or ncaaf
+        #if the line text contains NFL team name or location is NFL
+        #else is a college
         return "NFL"
     if("baseball" in text):
         #only mlb? or do people bet on college baseball?
         return "MLB"
     return "UNKNOWN"
 
-#DONE
 def parse_week(date):
     return date.strftime("%V")
 

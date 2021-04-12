@@ -7,6 +7,7 @@ class tweets_all(models.Model):
     text = models.TextField()
     url = models.CharField(max_length= 250)
     status_id = models.BigIntegerField()
+    time = models.CharField(max_length= 50)
     class Meta:
         db_table = "tweets_all"
 
@@ -16,6 +17,7 @@ class tweets_bets(models.Model):
     text = models.TextField()
     url = models.CharField(max_length= 250)
     status_id = models.BigIntegerField()
+    time = models.CharField(max_length= 50)
     class Meta:
         db_table = "tweets_bets"
 
@@ -43,5 +45,6 @@ class parsed_data(models.Model):
     unit_calc = models.DecimalField(decimal_places=2, max_digits= 10)
     url = models.CharField(max_length= 250)
     raw_text = models.TextField()
+    time = models.CharField(max_length= 50)
     class Meta:
         db_table = "parsed_data"

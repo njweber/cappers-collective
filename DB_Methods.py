@@ -8,18 +8,18 @@ connect = psycopg2.connect(
 
 cursor = connect.cursor()
 
-def save_bet_tweet(date, name, text, url, status_id):
-    cursor.execute("INSERT INTO tweets_bets (date, name, text, url, status_id) VALUES (%s, %s, %s, %s, %s)", (date, name, text, url, status_id))
+def save_bet_tweet(date, time, name, text, url, status_id):
+    cursor.execute("INSERT INTO tweets_bets (date, name, text, url, status_id, time) VALUES (%s, %s, %s, %s, %s, %s)", (date, name, text, url, status_id, time))
     connect.commit()
     return 1
 
-def save_all_tweet(date, name, text, url, status_id):
-    cursor.execute("INSERT INTO tweets_all (date, name, text, url, status_id) VALUES (%s, %s, %s, %s, %s)", (date, name, text, url, status_id))
+def save_all_tweet(date, time, name, text, url, status_id):
+    cursor.execute("INSERT INTO tweets_all (date, name, text, url, status_id, time) VALUES (%s, %s, %s, %s, %s, %s)", (date, name, text, url, status_id, time))
     connect.commit()
     return 1
 
-def save_parsed_bet_data(capper, league, week, date, bet_type, units, odds, result, unit_calc, url, raw_text):
-    cursor.execute("INSERT INTO parsed_data (capper, league, week, date, bet_type, units, odds, result, unit_calc, url, raw_text) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (capper, league, week, date, bet_type, units, odds, result, unit_calc, url, raw_text))
+def save_parsed_bet_data(capper, league, week, date, time, bet_type, units, odds, result, unit_calc, url, raw_text):
+    cursor.execute("INSERT INTO parsed_data (capper, league, week, date, bet_type, units, odds, result, unit_calc, url, raw_text, time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (capper, league, week, date, bet_type, units, odds, result, unit_calc, url, raw_text, time))
     connect.commit()
     return 1
 

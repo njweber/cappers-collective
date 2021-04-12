@@ -9,11 +9,11 @@ from .models import parsed_data
 
 @admin.register(tweets_all)
 class tweets_all_admin(admin.ModelAdmin):
-    list_display = ['date','name','text','url', 'status_id']
+    list_display = ['date','time','name','text','url', 'status_id']
 
 @admin.register(tweets_bets)
 class tweet_bets_admin(admin.ModelAdmin):
-    list_display = ['date','name','text','url', 'status_id']
+    list_display = ['date','time','name','text','url', 'status_id']
 
 @admin.register(twitter_users)
 class twitter_users_admin(admin.ModelAdmin):
@@ -25,4 +25,4 @@ class tweet_model(admin.ModelAdmin):
 
 @admin.register(parsed_data)
 class tweet_parsed_data(admin.ModelAdmin):
-    list_display = ['capper', 'league', 'week', 'date', 'bet_type', 'units', 'odds', 'result', 'unit_calc', 'url', 'raw_text']
+    list_display = ['capper', 'league', 'week', 'date', 'time', 'bet_type', 'units', 'odds', 'result', 'unit_calc', 'url', 'raw_text']
