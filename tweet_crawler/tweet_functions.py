@@ -21,16 +21,11 @@ def start_crawl():
     for u in users_all:
         if(u[2] == True):
             users.append(u[1])
-    print(users)
     for user_num in range(len(users)):
         flag = False
         tweet_num = 0
         while (flag == False):
-            #TODO: Something fucked up here?
-            try:
-                tweet = api.user_timeline(users[user_num])[tweet_num]
-            except IndexError:
-                print("API Error?? - 4/25/2021")
+            tweet = api.user_timeline(users[user_num])[tweet_num]
             tweet_date = tweet.created_at
             tweet_date = tweet_date.replace(tzinfo=tz.gettz('UTC'))
             tweet_date = str(tweet_date.astimezone(tz.gettz('Eastern Time Zone')))[0 : 10]
@@ -64,33 +59,37 @@ def is_user_specific_bet(text, models):
 
 # Parse Raw Text Bet Data 
 def parse_raw_text_bet_data(date, time, name, text, url):
-    #Making sure only bet_lines get saved to the database and all other junk is just ignored.
-    lines = text.splitlines()
+    lines = text.splitlines()   #Splits up raw text into seperate lines
     for line in lines:
-        if(len(line) == 0): #Line is only a return and contains no data
-            bet_line = False
-        if(len(lines) == 1): #Only 1 line means that is the bet line
+        if(len(lines) == 1):    #Only 1 line means that is the bet line
             bet_line = True
-        else:
-            #If line contains sports team or odds or bet type?
-            if(True):
-                bet_line = True
-            else:
+        else:                   #More than 1 line so potentially multiple bet lines
+            if(len(line) == 0): #Line empty only a return and contains no data
                 bet_line = False
-        if (bet_line): #Is it a bet line?
-            capper = name #Same
-            date = date #Same
-            time = time #Same   
-            url = url #Same
+            else:               #Line isnt empty. Need to check if it is a bet line or not
+                if(True):       #TODO: Check to make sure line is a bet line
+                    bet_line = True
+                else:
+                    bet_line = False
+        #---------------------------------
+        # Above checks for it line is a bet line
+        #---------------------------------
+        # Below saves bet data if it is a bet line
+        #---------------------------------
+        if (bet_line):
+            capper = name           #Same
+            date = date             #Same
+            time = time             #Same   
+            url = url               #Same
             week = parse_week(date) #Same
 
             #These variables will be independent to each bet line
-            league = parse_league(text)  #Potentially Different
+            league = parse_league(text)     #Potentially Different
             bet_type = parse_bet_type(text) #Potentially Different
-            units = parse_units() #Potentially Different
-            odds = parse_odds() #Potentially Different
-            result = parse_result() #Different
-            unit_calc = parse_unit_calc() #Potentially Different
+            units = parse_units()           #Potentially Different
+            odds = parse_odds()             #Potentially Different
+            unit_calc = parse_unit_calc()   #Potentially Different
+            result = parse_result()         #Different
             DB_Methods.save_parsed_bet_data(capper, league, week, date, time, bet_type, units, odds, result, unit_calc, url, text)
     return
     
@@ -109,11 +108,13 @@ def parse_league(text):
     if("baseball" in text):
         #only mlb? or do people bet on college baseball?
         return "MLB"
-    return "UNKNOWN"
+    return "UNKNOWN" #If all else fails
 
+#Parse the week of the year.
 def parse_week(date):
     return date.strftime("%V")
 
+#Parse the type of bet
 def parse_bet_type(text):
     split = text.split(' ')
     for snips in split:
@@ -143,17 +144,22 @@ def parse_bet_type(text):
         return "PARLAY"
     return "UNKNOWN"
 
+#Parse the units bet
 def parse_units():
     return 1
 
+#Parse the odds of the bet
 def parse_odds():
     return -110
 
+#Parse the results
 def parse_result():
     return "-"
 
+#Parse the units gained or lost
 def parse_unit_calc():
     return 0.90
 
+#Drop the tables for testing purposes
 def drop_tables():
     DB_Methods.drop_tables()
