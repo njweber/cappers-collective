@@ -2,7 +2,7 @@ import tweepy
 import time
 import Private
 import DB_Methods
-from dateutil import tz
+from dateutil import tz 
 from datetime import datetime
 
 #TODO: Continue league and bet type parsing
@@ -38,8 +38,8 @@ def start_crawl():
             if(tweet_date == today): #Tweet from today!
                 tweet_num = tweet_num + 1
                 date = tweet.created_at
-                time_date = 0 #date.replace(tzinfo=tz.gettz('UTC'))
-                time = 0 #time_date.astimezone(tz.gettz('Eastern Time Zone')).strftime("%I:%M:%S %p")
+                time_date = date.replace(tzinfo=tz.gettz('UTC'))
+                time = time_date.astimezone(tz.gettz('Eastern Time Zone')).strftime("%I:%M:%S %p")
                 name = tweet.user.screen_name  
                 text = tweet.text
                 url = "https://twitter.com/" + name + "/statuses/" + str(tweet.id)
