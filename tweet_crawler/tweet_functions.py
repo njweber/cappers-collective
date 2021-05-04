@@ -25,7 +25,7 @@ def start_crawl():
         flag = False
         tweet_num = 0
         while (flag == False):
-            tweet = api.user_timeline(users[user_num])[tweet_num]
+            tweet = api.user_timeline(users[user_num], count=50)[tweet_num]
             tweet_date = tweet.created_at
             tweet_date = tweet_date.replace(tzinfo=tz.gettz('UTC'))
             tweet_date = str(tweet_date.astimezone(tz.gettz('Eastern Time Zone')))[0 : 10]
