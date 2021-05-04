@@ -5,9 +5,6 @@ import DB_Methods
 from dateutil import tz
 from datetime import datetime
 
-#TODO: Look into protect/private account pulling
-#In Progress: Split single/mult bet tweet into seperate items
-#DONE: Add times of tweet not just the date
 #TODO: Continue league and bet type parsing
 #TODO: Look into excel archiving 
 
@@ -24,11 +21,16 @@ def start_crawl():
     for u in users_all:
         if(u[2] == True):
             users.append(u[1])
+    print(users)
     for user_num in range(len(users)):
         flag = False
         tweet_num = 0
         while (flag == False):
-            tweet = api.user_timeline(users[user_num])[tweet_num]
+            #TODO: Something fucked up here?
+            try:
+                tweet = api.user_timeline(users[user_num])[tweet_num]
+            except IndexError:
+                print("API Error?? - 4/25/2021")
             tweet_date = tweet.created_at
             tweet_date = tweet_date.replace(tzinfo=tz.gettz('UTC'))
             tweet_date = str(tweet_date.astimezone(tz.gettz('Eastern Time Zone')))[0 : 10]
@@ -36,8 +38,8 @@ def start_crawl():
             if(tweet_date == today): #Tweet from today!
                 tweet_num = tweet_num + 1
                 date = tweet.created_at
-                time_date = date.replace(tzinfo=tz.gettz('UTC'))
-                time = time_date.astimezone(tz.gettz('Eastern Time Zone')).strftime("%I:%M:%S %p")
+                time_date = 0 #date.replace(tzinfo=tz.gettz('UTC'))
+                time = 0 #time_date.astimezone(tz.gettz('Eastern Time Zone')).strftime("%I:%M:%S %p")
                 name = tweet.user.screen_name  
                 text = tweet.text
                 url = "https://twitter.com/" + name + "/statuses/" + str(tweet.id)
@@ -62,11 +64,20 @@ def is_user_specific_bet(text, models):
 
 # Parse Raw Text Bet Data 
 def parse_raw_text_bet_data(date, time, name, text, url):
-    #How to handle different number of lines?
-    #Make sure to take into account how to handle single bet with multiple lines 
+    #Making sure only bet_lines get saved to the database and all other junk is just ignored.
     lines = text.splitlines()
     for line in lines:
-        if (True): #Is it a bet line?
+        if(len(line) == 0): #Line is only a return and contains no data
+            bet_line = False
+        if(len(lines) == 1): #Only 1 line means that is the bet line
+            bet_line = True
+        else:
+            #If line contains sports team or odds or bet type?
+            if(True):
+                bet_line = True
+            else:
+                bet_line = False
+        if (bet_line): #Is it a bet line?
             capper = name #Same
             date = date #Same
             time = time #Same   
