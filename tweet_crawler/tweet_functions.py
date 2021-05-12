@@ -5,8 +5,10 @@ import DB_Methods
 from dateutil import tz 
 from datetime import datetime
 
-#TODO: Continue league and bet type parsing
-#TODO: Look into excel archiving 
+#DONE: Added bet_line_models to allow us to declare which lines are bet lines (there might be a better solution? Think!)
+#DONE: Changed drop downs for users in all table to pull from the user database
+#TODO: Look into excel archiving
+#TODO: Advanced searches 
 
 #Crawls twitter for tweets. Saving to DB when tweet is a betting tweet. Also checks for duplicates.
 def start_crawl():
@@ -40,11 +42,12 @@ def start_crawl():
                 url = "https://twitter.com/" + name + "/statuses/" + str(tweet.id)
                 status_id = tweet.id 
                 models = DB_Methods.get_bet_models_by_user(users[user_num])
+                bet_line_models = DB_Methods.get_bet_line_models_by_user(users[user_num])
                 if(not DB_Methods.check_dupe_tweets(status_id)):
                     DB_Methods.save_all_tweet(date, time, name, text, url, status_id)
                     if(is_user_specific_bet(text, models)):
                         DB_Methods.save_bet_tweet(date, time, name, text, url, status_id)
-                        parse_raw_text_bet_data(date, time, name, text, url)
+                        parse_raw_text_bet_data(date, time, name, text, url, bet_line_models)
             else:
                 tweet_num = 0
                 flag = True #Not a tweet from today so go to next user  
@@ -58,7 +61,8 @@ def is_user_specific_bet(text, models):
     return False
 
 # Parse Raw Text Bet Data 
-def parse_raw_text_bet_data(date, time, name, text, url):
+def parse_raw_text_bet_data(date, time, name, text, url, bet_line_models):
+    parsed_text = ""
     lines = text.splitlines()   #Splits up raw text into seperate lines
     for line in lines:
         if(len(lines) == 1):    #Only 1 line means that is the bet line
@@ -67,15 +71,17 @@ def parse_raw_text_bet_data(date, time, name, text, url):
             if(len(line) == 0): #Line empty only a return and contains no data
                 bet_line = False
             else:               #Line isnt empty. Need to check if it is a bet line or not
-                if(True):       #TODO: Check to make sure line is a bet line
-                    bet_line = True
-                else:
-                    bet_line = False
-        #---------------------------------
+                for model in bet_line_models:
+                    if(model in text):
+                        bet_line = True
+                    else:
+                        bet_line = False
+                        parsed_text += line     #UNTESTED: Should add false lines to parsed_text
         # Above checks for it line is a bet line
         #---------------------------------
         # Below saves bet data if it is a bet line
         #---------------------------------
+
         if (bet_line):
             capper = name           #Same
             date = date             #Same
@@ -90,7 +96,8 @@ def parse_raw_text_bet_data(date, time, name, text, url):
             odds = parse_odds()             #Potentially Different
             unit_calc = parse_unit_calc()   #Potentially Different
             result = parse_result()         #Different
-            DB_Methods.save_parsed_bet_data(capper, league, week, date, time, bet_type, units, odds, result, unit_calc, url, text)
+            parsed_text += line
+            DB_Methods.save_parsed_bet_data(capper, league, week, date, time, bet_type, units, odds, result, unit_calc, url, parsed_text)
     return
     
 

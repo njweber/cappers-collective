@@ -1,9 +1,10 @@
 from django.db import models
+import DB_Methods
 
 # Create your models here.
 class tweets_all(models.Model):
     date = models.DateField()
-    name = models.CharField(max_length= 50)
+    name = models.CharField(max_length= 50, choices=DB_Methods.get_user_list_names_only())
     text = models.TextField()
     url = models.CharField(max_length= 250)
     status_id = models.BigIntegerField()
@@ -13,7 +14,7 @@ class tweets_all(models.Model):
 
 class tweets_bets(models.Model):
     date = models.DateField()
-    name = models.CharField(max_length= 50)
+    name = models.CharField(max_length= 50, choices=DB_Methods.get_user_list_names_only())
     text = models.TextField()
     url = models.CharField(max_length= 250)
     status_id = models.BigIntegerField()
@@ -28,13 +29,20 @@ class twitter_users(models.Model):
         db_table = "twitter_users"
 
 class tweet_models(models.Model):
-    user = models.CharField(max_length= 50)
+    user = models.CharField(max_length= 50, choices=DB_Methods.get_user_list_names_only())
     model = models.CharField(max_length= 50)
     class Meta:
         db_table = "tweet_models"
 
+class bet_line_models(models.Model):
+    user = models.CharField(max_length= 50, choices=DB_Methods.get_user_list_names_only())
+    model = models.CharField(max_length= 50)
+    class Meta:
+        db_table = "bet_line_models"
+
+
 class parsed_data(models.Model):
-    capper = models.CharField(max_length= 50)
+    capper = models.CharField(max_length= 50, choices=DB_Methods.get_user_list_names_only())
     league = models.CharField(max_length= 15)
     week = models.IntegerField()
     date = models.DateField()

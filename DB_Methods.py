@@ -37,9 +37,24 @@ def get_user_list():
     for row in cursor:
         users.append(row)
     return users 
+
+def get_user_list_names_only():
+    cursor.execute("SELECT * FROM twitter_users")
+    users = ()
+    for row in cursor:
+        users += ((str(row[1]), str(row[1])),)
+    return users
     
 def get_bet_models_by_user(user):
     cursor.execute("SELECT * FROM tweet_models")
+    models = []
+    for row in cursor:
+        if (row[1] == user):
+            models.append(row[2])
+    return models 
+
+def get_bet_line_models_by_user(user):
+    cursor.execute("SELECT * FROM bet_line_models")
     models = []
     for row in cursor:
         if (row[1] == user):

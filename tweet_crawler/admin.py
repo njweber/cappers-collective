@@ -1,11 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import tweets_all
-from .models import tweets_bets
-from .models import twitter_users
-from .models import tweet_models
-from .models import parsed_data
+from .models import *
 
 @admin.register(tweets_all)
 class tweets_all_admin(admin.ModelAdmin):
@@ -21,6 +17,10 @@ class twitter_users_admin(admin.ModelAdmin):
 
 @admin.register(tweet_models)
 class tweet_model(admin.ModelAdmin):
+    list_display = ['user', 'model']
+
+@admin.register(bet_line_models)
+class bet_line_model(admin.ModelAdmin):
     list_display = ['user', 'model']
 
 @admin.register(parsed_data)
