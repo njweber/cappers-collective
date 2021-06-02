@@ -77,6 +77,7 @@ def parse_raw_text_bet_data(date, time, name, text, url, bet_line_models):
                     else:
                         bet_line = False
                         parsed_text += line     #UNTESTED: Should add false lines to parsed_text
+                        
         # Above checks for it line is a bet line
         #---------------------------------
         # Below saves bet data if it is a bet line
