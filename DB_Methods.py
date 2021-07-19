@@ -61,6 +61,23 @@ def get_bet_line_models_by_user(user):
             models.append(row[2])
     return models 
 
+
+
+## START LEAGUE DATABASE CHECKS
+
+def doesTextContainMLB(text):
+    cursor.execute("SELECT * FROM mlb_references")
+    for row in cursor:
+        if(row[0] in text):
+            return True
+    return False
+
+#NBA
+#NHL
+#NFL
+
+## END LEAGUE DATABASE CHECKS
+
 #This will be deleted eventually!
 def drop_tables():
     cursor.execute("DELETE FROM tweets_all")

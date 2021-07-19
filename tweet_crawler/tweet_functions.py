@@ -5,8 +5,9 @@ import DB_Methods
 from dateutil import tz 
 from datetime import datetime
 
-#DONE: Added bet_line_models to allow us to declare which lines are bet lines (there might be a better solution? Think!)
-#DONE: Changed drop downs for users in all table to pull from the user database
+#TODO: Look into adding junk lines to the bet lines. Would need to create an array of junk lines and add to end/start of bet line.
+#TODO: Look into setting up a development database we can push a production database out.
+#TODO: Test bet parsing
 #TODO: Look into excel archiving
 #TODO: Advanced searches 
 
@@ -62,21 +63,19 @@ def is_user_specific_bet(text, models):
 
 # Parse Raw Text Bet Data 
 def parse_raw_text_bet_data(date, time, name, text, url, bet_line_models):
-    parsed_text = ""
-    lines = text.splitlines()   #Splits up raw text into seperate lines
+    lines = text.splitlines()       #Splits up raw text into seperate lines
     for line in lines:
-        if(len(lines) == 1):    #Only 1 line means that is the bet line
+        if(len(lines) == 1):        #Only 1 line means that is the bet line
             bet_line = True
-        else:                   #More than 1 line so potentially multiple bet lines
-            if(len(line) == 0): #Line empty only a return and contains no data
+        else:                       #More than 1 line so potentially multiple bet lines
+            if(len(line) == 0):     #Line empty only a return and contains no data
                 bet_line = False
-            else:               #Line isnt empty. Need to check if it is a bet line or not
+            else:                   #Line isnt empty. Need to check if it is a bet line or not
                 for model in bet_line_models:
-                    if(model in text):
+                    if(model in line):
                         bet_line = True
                     else:
                         bet_line = False
-                        parsed_text += line     #UNTESTED: Should add false lines to parsed_text
                         
         # Above checks for it line is a bet line
         #---------------------------------
@@ -91,17 +90,19 @@ def parse_raw_text_bet_data(date, time, name, text, url, bet_line_models):
             week = parse_week(date) #Same
 
             #These variables will be independent to each bet line
-            league = parse_league(text)     #Potentially Different
-            bet_type = parse_bet_type(text) #Potentially Different
+            league = parse_league(line)     #Potentially Different
+            bet_type = parse_bet_type(line) #Potentially Different
             units = parse_units()           #Potentially Different
             odds = parse_odds()             #Potentially Different
             unit_calc = parse_unit_calc()   #Potentially Different
             result = parse_result()         #Different
-            parsed_text += line
-            DB_Methods.save_parsed_bet_data(capper, league, week, date, time, bet_type, units, odds, result, unit_calc, url, parsed_text)
+            DB_Methods.save_parsed_bet_data(capper, league, week, date, time, bet_type, units, odds, result, unit_calc, url, line)
     return
     
 
+#NOTE: Might be useful to make these into models so we can make sure they cover all different types of referring to leagues
+#NOTE: Did not implement the MLB database table yet. I think we can combo the league DB tables and a models table for each league
+#NOTE: to cover all of the possible references to a league.
 def parse_league(text):
     if("basketball" in text):
         #either nba or ncaab
@@ -113,8 +114,7 @@ def parse_league(text):
         #if the line text contains NFL team name or location is NFL
         #else is a college
         return "NFL"
-    if("baseball" in text):
-        #only mlb? or do people bet on college baseball?
+    if("baseball" in text or DB_Methods.doesTextContainMLB(text)):
         return "MLB"
     return "UNKNOWN" #If all else fails
 
