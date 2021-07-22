@@ -53,6 +53,22 @@ def get_bet_models_by_user(user):
             models.append(row[2])
     return models 
 
+def get_win_models_by_user(user):
+    cursor.execute("SELECT * FROM win_models")
+    models = []
+    for row in cursor:
+        if (row[1] == user):
+            models.append(row[2])
+    return models 
+
+def get_loss_models_by_user(user):
+    cursor.execute("SELECT * FROM loss_models")
+    models = []
+    for row in cursor:
+        if (row[1] == user):
+            models.append(row[2])
+    return models 
+
 def get_bet_line_models_by_user(user):
     cursor.execute("SELECT * FROM bet_line_models")
     models = []
@@ -68,7 +84,7 @@ def get_bet_line_models_by_user(user):
 def doesTextContainMLB(text):
     cursor.execute("SELECT * FROM mlb_references")
     for row in cursor:
-        if(row[0] in text):
+        if(row[0].lower() in text.lower()):
             return True
     return False
 

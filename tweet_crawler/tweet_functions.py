@@ -28,7 +28,7 @@ def start_crawl():
         flag = False
         tweet_num = 0
         while (flag == False):
-            tweet = api.user_timeline(users[user_num], count=50)[tweet_num]
+            tweet = api.user_timeline(users[user_num], count=50, tweet_mode="extended")[tweet_num]
             tweet_date = tweet.created_at
             tweet_date = tweet_date.replace(tzinfo=tz.gettz('UTC'))
             tweet_date = str(tweet_date.astimezone(tz.gettz('Eastern Time Zone')))[0 : 10]
@@ -39,16 +39,18 @@ def start_crawl():
                 time_date = date.replace(tzinfo=tz.gettz('UTC'))
                 time = time_date.astimezone(tz.gettz('Eastern Time Zone')).strftime("%I:%M:%S %p")
                 name = tweet.user.screen_name  
-                text = tweet.text
+                text = tweet.full_text
                 url = "https://twitter.com/" + name + "/statuses/" + str(tweet.id)
                 status_id = tweet.id 
                 models = DB_Methods.get_bet_models_by_user(users[user_num])
                 bet_line_models = DB_Methods.get_bet_line_models_by_user(users[user_num])
+                win_models = DB_Methods.get_win_models_by_user(users[user_num])
+                loss_models = DB_Methods.get_loss_models_by_user(users[user_num])
                 if(not DB_Methods.check_dupe_tweets(status_id)):
                     DB_Methods.save_all_tweet(date, time, name, text, url, status_id)
                     if(is_user_specific_bet(text, models)):
                         DB_Methods.save_bet_tweet(date, time, name, text, url, status_id)
-                        parse_raw_text_bet_data(date, time, name, text, url, bet_line_models)
+                        parse_raw_text_bet_data(date, time, name, text, url, bet_line_models, win_models, loss_models)
             else:
                 tweet_num = 0
                 flag = True #Not a tweet from today so go to next user  
@@ -62,7 +64,7 @@ def is_user_specific_bet(text, models):
     return False
 
 # Parse Raw Text Bet Data 
-def parse_raw_text_bet_data(date, time, name, text, url, bet_line_models):
+def parse_raw_text_bet_data(date, time, name, text, url, bet_line_models, win_models, loss_models):
     lines = text.splitlines()       #Splits up raw text into seperate lines
     for line in lines:
         if(len(lines) == 1):        #Only 1 line means that is the bet line
@@ -71,11 +73,10 @@ def parse_raw_text_bet_data(date, time, name, text, url, bet_line_models):
             if(len(line) == 0):     #Line empty only a return and contains no data
                 bet_line = False
             else:                   #Line isnt empty. Need to check if it is a bet line or not
+                bet_line = False
                 for model in bet_line_models:
                     if(model in line):
                         bet_line = True
-                    else:
-                        bet_line = False
                         
         # Above checks for it line is a bet line
         #---------------------------------
@@ -90,12 +91,12 @@ def parse_raw_text_bet_data(date, time, name, text, url, bet_line_models):
             week = parse_week(date) #Same
 
             #These variables will be independent to each bet line
-            league = parse_league(line)     #Potentially Different
-            bet_type = parse_bet_type(line) #Potentially Different
-            units = parse_units()           #Potentially Different
-            odds = parse_odds()             #Potentially Different
-            unit_calc = parse_unit_calc()   #Potentially Different
-            result = parse_result()         #Different
+            league = parse_league(line)                        
+            bet_type = parse_bet_type(line)                    
+            units = parse_units(line)                          
+            odds = parse_odds(line)                           
+            result = parse_result(line, win_models, loss_models)           
+            unit_calc = parse_unit_calc(odds, units, result)  
             DB_Methods.save_parsed_bet_data(capper, league, week, date, time, bet_type, units, odds, result, unit_calc, url, line)
     return
     
@@ -103,6 +104,7 @@ def parse_raw_text_bet_data(date, time, name, text, url, bet_line_models):
 #NOTE: Might be useful to make these into models so we can make sure they cover all different types of referring to leagues
 #NOTE: Did not implement the MLB database table yet. I think we can combo the league DB tables and a models table for each league
 #NOTE: to cover all of the possible references to a league.
+#TODO: Add league check for parse and maybe models
 def parse_league(text):
     if("basketball" in text):
         #either nba or ncaab
@@ -122,6 +124,7 @@ def parse_league(text):
 def parse_week(date):
     return date.strftime("%V")
 
+#TODO: Parse the bet type
 #Parse the type of bet
 def parse_bet_type(text):
     split = text.split(' ')
@@ -153,21 +156,43 @@ def parse_bet_type(text):
     return "UNKNOWN"
 
 #Parse the units bet
-def parse_units():
+def parse_units(line):
     return 1
 
 #Parse the odds of the bet
-def parse_odds():
+def parse_odds(text):
+    split = text.split('+')
+    for snip in split:
+        if(snip[0:3].isnumeric()):
+            return "+" + snip[0:3]
+            
+    split = text.split('-')
+    for snip in split:
+        if(snip[0:3].isnumeric()):
+            return "-" + snip[0:3]
     return -110
 
 #Parse the results
-def parse_result():
+def parse_result(text, win_models, loss_models):
+    for model in win_models:
+        if(model in text):
+            return "W"
+    for model in loss_models:
+        if(model in text):
+            return "L"
     return "-"
 
 #Parse the units gained or lost
-def parse_unit_calc():
-    return 0.90
+def parse_unit_calc(odds, units, result):
+    if(result == "L"):
+        return "-" + str(units)
+    if(int(odds) < 0):
+        calc = -100/int(odds) * int(units)
+    else:
+        calc = int(odds)/100 * int(units)
+    return "+" + str(calc)
 
+#TODO: Remove this eventually
 #Drop the tables for testing purposes
 def drop_tables():
     DB_Methods.drop_tables()

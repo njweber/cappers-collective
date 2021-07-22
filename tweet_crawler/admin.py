@@ -23,6 +23,14 @@ class tweet_model(admin.ModelAdmin):
 class bet_line_model(admin.ModelAdmin):
     list_display = ['user', 'model']
 
+@admin.register(win_models)
+class win_models(admin.ModelAdmin):
+    list_display = ['user', 'model']
+
+@admin.register(loss_models)
+class loss_model(admin.ModelAdmin):
+    list_display = ['user', 'model']
+
 @admin.register(parsed_data)
 class tweet_parsed_data(admin.ModelAdmin):
     list_display = ['capper', 'league', 'week', 'date', 'time', 'bet_type', 'units', 'odds', 'result', 'unit_calc', 'url', 'raw_text']

@@ -34,6 +34,18 @@ class tweet_models(models.Model):
     class Meta:
         db_table = "tweet_models"
 
+class win_models(models.Model):
+    user = models.CharField(max_length= 50, choices=DB_Methods.get_user_list_names_only())
+    model = models.CharField(max_length= 50)
+    class Meta:
+        db_table = "win_models"
+
+class loss_models(models.Model):
+    user = models.CharField(max_length= 50, choices=DB_Methods.get_user_list_names_only())
+    model = models.CharField(max_length= 50)
+    class Meta:
+        db_table = "loss_models"
+
 class bet_line_models(models.Model):
     user = models.CharField(max_length= 50, choices=DB_Methods.get_user_list_names_only())
     model = models.CharField(max_length= 50)
