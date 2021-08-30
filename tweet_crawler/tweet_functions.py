@@ -130,11 +130,14 @@ def parse_bet_type(text):
     split = text.split(' ')
     for snip in split:
         #Spread bet
-        if(snip.isnumeric() and int(snip) < 100):
+        temp_snip = snip.replace("-", "")
+        temp_snip = temp_snip.replace("+", "")
+        temp_snip = temp_snip.replace(".", "")
+        if(temp_snip.isdecimal() and int(temp_snip) < 100):
             return "SP"  
 
         #Over under bet
-        if( snip[0] != None and snip[1] != None):    
+        if( len(snip) > 1 ):    
             if((snip[0] == "U" or snip[0] == "O") and snip[1:].isnumeric()):
                 return "OU"  
         
