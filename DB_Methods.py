@@ -82,15 +82,46 @@ def get_bet_line_models_by_user(user):
 ## START LEAGUE DATABASE CHECKS
 
 def doesTextContainMLB(text):
-    cursor.execute("SELECT * FROM mlb_references")
+    cursor.execute("SELECT * FROM mlb_models")
     for row in cursor:
-        if(row[0].lower() in text.lower()):
+        if(row[1].lower() in text.lower()):
             return True
     return False
 
-#NBA
-#NHL
-#NFL
+def doesTextContainNBA(text):
+    cursor.execute("SELECT * FROM nba_models")
+    for row in cursor:
+        if(row[1].lower() in text.lower()):
+            return True
+    return False
+
+def doesTextContainNCAAB(text):
+    cursor.execute("SELECT * FROM ncaab_models")
+    for row in cursor:
+        if(row[1].lower() in text.lower()):
+            return True
+    return False
+
+def doesTextContainNHL(text):
+    cursor.execute("SELECT * FROM nhl_models")
+    for row in cursor:
+        if(row[1].lower() in text.lower()):
+            return True
+    return False
+
+def doesTextContainNFL(text):
+    cursor.execute("SELECT * FROM nfl_models")
+    for row in cursor:
+        if(row[1].lower() in text.lower()):
+            return True
+    return False
+
+def doesTextContainNCAAF(text):
+    cursor.execute("SELECT * FROM ncaaf_models")
+    for row in cursor:
+        if(row[1].lower() in text.lower()):
+            return True
+    return False
 
 ## END LEAGUE DATABASE CHECKS
 

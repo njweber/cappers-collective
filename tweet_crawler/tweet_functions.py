@@ -1,3 +1,11 @@
+# First Week of Sept
+# -----------------------
+# Look into twitter encoded emojis and how to handle with models
+# DONE - Add models for all leagues
+# Finish Unit Parsing
+# DONE - Test bet type parsing (might need some fine tuning)
+# Look into "advanced" search/query lookup
+
 import tweepy
 import time
 import Private
@@ -6,10 +14,7 @@ from dateutil import tz
 from datetime import datetime
 
 #TODO: Look into adding junk lines to the bet lines. Would need to create an array of junk lines and add to end/start of bet line.
-#TODO: Look into setting up a development database we can push a production database out.
-#TODO: Test bet parsing
 #TODO: Look into excel archiving
-#TODO: Advanced searches 
 
 #Crawls twitter for tweets. Saving to DB when tweet is a betting tweet. Also checks for duplicates.
 def start_crawl():
@@ -82,7 +87,6 @@ def parse_raw_text_bet_data(date, time, name, text, url, bet_line_models, win_mo
         #---------------------------------
         # Below saves bet data if it is a bet line
         #---------------------------------
-
         if (bet_line):
             capper = name           #Same
             date = date             #Same
@@ -91,32 +95,29 @@ def parse_raw_text_bet_data(date, time, name, text, url, bet_line_models, win_mo
             week = parse_week(date) #Same
 
             #These variables will be independent to each bet line
-            league = parse_league(line)                        
-            bet_type = parse_bet_type(line)                    
-            units = parse_units(line)                          
-            odds = parse_odds(line)                           
+            league = parse_league(line)
+            bet_type = parse_bet_type(line)
+            units = parse_units(line)
+            odds = parse_odds(line)
             result = parse_result(line, win_models, loss_models)           
             unit_calc = parse_unit_calc(odds, units, result)  
             DB_Methods.save_parsed_bet_data(capper, league, week, date, time, bet_type, units, odds, result, unit_calc, url, line)
     return
     
-
-#NOTE: Might be useful to make these into models so we can make sure they cover all different types of referring to leagues
-#NOTE: Did not implement the MLB database table yet. I think we can combo the league DB tables and a models table for each league
-#NOTE: to cover all of the possible references to a league.
-#TODO: Add league check for parse and maybe models
 def parse_league(text):
-    if("basketball" in text):
-        #either nba or ncaab
-        #if the line text contains NBA team name or location is NBA
-        #else is a college
+    if(DB_Methods.doesTextContainNBA(text)):
         return "NBA"
-    if("football" in text):
-        #either nfl or ncaaf
-        #if the line text contains NFL team name or location is NFL
-        #else is a college
+
+    if(DB_Methods.doesTextContainNCAAB(text)):
+        return "NCAAB"
+
+    if(DB_Methods.doesTextContainNFL(text)):
         return "NFL"
-    if("baseball" in text or DB_Methods.doesTextContainMLB(text)):
+
+    if(DB_Methods.doesTextContainNCAAF(text)):
+        return "NCAAF"
+
+    if(DB_Methods.doesTextContainMLB(text)):
         return "MLB"
     return "UNKNOWN" #If all else fails
 
@@ -124,38 +125,37 @@ def parse_league(text):
 def parse_week(date):
     return date.strftime("%V")
 
-#TODO: Parse the bet type
 #Parse the type of bet
 def parse_bet_type(text):
     split = text.split(' ')
-    for snips in split:
-        #print(snips)
-        try: #Spread bet
-            flag = int(snips) < 100 and int(snips) > -100 
-            #print(flag)
-        except:
-            break #Not a valid data type
-        if (flag is True):
-            print("Spread!")
-            return "SP"
-    if():
-        #Over under bet  
-        return "OU"  
-    if():
-        #Money line bet
-        return "ML"
+    for snip in split:
+        #Spread bet
+        if(snip.isnumeric() and int(snip) < 100):
+            return "SP"  
+
+        #Over under bet
+        if( snip[0] != None and snip[1] != None):    
+            if((snip[0] == "U" or snip[0] == "O") and snip[1:].isnumeric()):
+                return "OU"  
+        
+    #TODO: Parse player prop bets
     if(): 
         #Player prop bet
         return "PR"
+    #TODO: Parse teaser bets
     if():
         #Teaser bet
         return "TS"
+    #TODO: Parse parley bets
     if():
         #Parlay bet
         return "PARLAY"
-    return "UNKNOWN"
+        
+    #Money line bet if nothing else
+    return "ML"
 
 #Parse the units bet
+#TODO: Parse Units
 def parse_units(line):
     return 1
 

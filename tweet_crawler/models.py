@@ -52,6 +52,35 @@ class bet_line_models(models.Model):
     class Meta:
         db_table = "bet_line_models"
 
+class mlb_models(models.Model):
+    text = models.CharField(max_length= 50)
+    class Meta:
+        db_table = "mlb_models"
+
+class nba_models(models.Model):
+    text = models.CharField(max_length= 50)
+    class Meta:
+        db_table = "nba_models"
+
+class ncaab_models(models.Model):
+    text = models.CharField(max_length= 50)
+    class Meta:
+        db_table = "ncaab_models"
+
+class ncaaf_models(models.Model):
+    text = models.CharField(max_length= 50)
+    class Meta:
+        db_table = "ncaaf_models"
+
+class nfl_models(models.Model):
+    text = models.CharField(max_length= 50)
+    class Meta:
+        db_table = "nfl_models"
+
+class nhl_models(models.Model):
+    text = models.CharField(max_length= 50)
+    class Meta:
+        db_table = "nhl_models"
 
 class parsed_data(models.Model):
     capper = models.CharField(max_length= 50, choices=DB_Methods.get_user_list_names_only())

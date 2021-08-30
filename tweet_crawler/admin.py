@@ -31,6 +31,30 @@ class win_models(admin.ModelAdmin):
 class loss_model(admin.ModelAdmin):
     list_display = ['user', 'model']
 
+@admin.register(mlb_models)
+class mlb_model(admin.ModelAdmin):
+    list_display = ['text']
+
+@admin.register(nba_models)
+class nba_model(admin.ModelAdmin):
+    list_display = ['text']
+
+@admin.register(ncaab_models)
+class ncaab_model(admin.ModelAdmin):
+    list_display = ['text']
+
+@admin.register(ncaaf_models)
+class ncaaf_model(admin.ModelAdmin):
+    list_display = ['text']
+
+@admin.register(nfl_models)
+class nfl_model(admin.ModelAdmin):
+    list_display = ['text']
+
+@admin.register(nhl_models)
+class nhl_model(admin.ModelAdmin):
+    list_display = ['text']
+
 @admin.register(parsed_data)
 class tweet_parsed_data(admin.ModelAdmin):
     list_display = ['capper', 'league', 'week', 'date', 'time', 'bet_type', 'units', 'odds', 'result', 'unit_calc', 'url', 'raw_text']
