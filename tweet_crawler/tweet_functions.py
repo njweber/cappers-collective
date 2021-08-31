@@ -1,11 +1,7 @@
-# First Week of Sept
-# -----------------------
-# Look into twitter encoded emojis and how to handle with models
-# DONE - Add models for all leagues
+# IN PROGRESS - Look into twitter encoded emojis and how to handle with models
 # Finish Unit Parsing
-# DONE - Test bet type parsing (might need some fine tuning)
-# Look into "advanced" search/query lookup
 
+import emoji
 import tweepy
 import time
 import Private
@@ -101,6 +97,7 @@ def parse_raw_text_bet_data(date, time, name, text, url, bet_line_models, win_mo
             odds = parse_odds(line)
             result = parse_result(line, win_models, loss_models)           
             unit_calc = parse_unit_calc(odds, units, result)  
+            line = emoji.demojize(line, delimiters=("", ""))
             DB_Methods.save_parsed_bet_data(capper, league, week, date, time, bet_type, units, odds, result, unit_calc, url, line)
     return
     

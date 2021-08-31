@@ -58,3 +58,4 @@ class nhl_model(admin.ModelAdmin):
 @admin.register(parsed_data)
 class tweet_parsed_data(admin.ModelAdmin):
     list_display = ['capper', 'league', 'week', 'date', 'time', 'bet_type', 'units', 'odds', 'result', 'unit_calc', 'url', 'raw_text']
+    search_fields = ['capper', 'league', 'week']
