@@ -1,4 +1,3 @@
-# IN PROGRESS - Look into twitter encoded emojis and how to handle with models
 # Finish Unit Parsing
 
 import emoji
@@ -8,7 +7,13 @@ import Private
 import DB_Methods
 from dateutil import tz 
 from datetime import datetime
+from django.shortcuts import render
 
+#TODO: Try to remove betlines that are junk. ON GOING!
+#DONE: If bet line doesnt contain numbers ignore it!
+#DONE: Allow models to be used for all users.
+#DONE: Draft up some documentation on how the application works.
+#TODO: Add reporting to crawl and send email with report details.
 #TODO: Look into adding junk lines to the bet lines. Would need to create an array of junk lines and add to end/start of bet line.
 #TODO: Look into excel archiving
 
@@ -25,9 +30,18 @@ def start_crawl():
     for u in users_all:
         if(u[2] == True):
             users.append(u[1])
+
+    #Reported data list
+    report_list = []
+    for i in range(len(users)):
+        report_list.append([])
+
+    report_count = 0
     for user_num in range(len(users)):
         flag = False
         tweet_num = 0
+        bet_num = 0
+        report_list[report_count].append(users[user_num])
         while (flag == False):
             tweet = api.user_timeline(users[user_num], count=50, tweet_mode="extended")[tweet_num]
             tweet_date = tweet.created_at
@@ -40,22 +54,27 @@ def start_crawl():
                 time_date = date.replace(tzinfo=tz.gettz('UTC'))
                 time = time_date.astimezone(tz.gettz('Eastern Time Zone')).strftime("%I:%M:%S %p")
                 name = tweet.user.screen_name  
-                text = tweet.full_text
+                text = emoji.demojize(tweet.full_text, delimiters=("", ""))
                 url = "https://twitter.com/" + name + "/statuses/" + str(tweet.id)
                 status_id = tweet.id 
-                models = DB_Methods.get_bet_models_by_user(users[user_num])
-                bet_line_models = DB_Methods.get_bet_line_models_by_user(users[user_num])
-                win_models = DB_Methods.get_win_models_by_user(users[user_num])
-                loss_models = DB_Methods.get_loss_models_by_user(users[user_num])
+                models = DB_Methods.get_bet_models_by_user(users[user_num]) + DB_Methods.get_bet_models_by_user("ALL_USERS")
+                bet_line_models = DB_Methods.get_bet_line_models_by_user(users[user_num]) + DB_Methods.get_bet_line_models_by_user("ALL_USERS")
+                win_models = DB_Methods.get_win_models_by_user(users[user_num]) + DB_Methods.get_win_models_by_user("ALL_USERS")
+                loss_models = DB_Methods.get_loss_models_by_user(users[user_num]) + DB_Methods.get_loss_models_by_user("ALL_USERS")
                 if(not DB_Methods.check_dupe_tweets(status_id)):
                     DB_Methods.save_all_tweet(date, time, name, text, url, status_id)
                     if(is_user_specific_bet(text, models)):
+                        bet_num = bet_num + 1
                         DB_Methods.save_bet_tweet(date, time, name, text, url, status_id)
                         parse_raw_text_bet_data(date, time, name, text, url, bet_line_models, win_models, loss_models)
             else:
                 tweet_num = 0
                 flag = True #Not a tweet from today so go to next user  
-    return
+                #report_list[report_count].append(tweet_num)
+                #report_list[report_count].append(bet_num)
+                report_count = report_count + 1
+    ##create_report(report_list)
+    return report_list
 
 # Determines if the tweet is a bet tweet depending on user
 def is_user_specific_bet(text, models):
@@ -63,6 +82,9 @@ def is_user_specific_bet(text, models):
         if(model in text):
             return True
     return False
+
+#TODO: ...
+# Reports the information found during a crawl
 
 # Parse Raw Text Bet Data 
 def parse_raw_text_bet_data(date, time, name, text, url, bet_line_models, win_models, loss_models):
@@ -78,27 +100,27 @@ def parse_raw_text_bet_data(date, time, name, text, url, bet_line_models, win_mo
                 for model in bet_line_models:
                     if(model in line):
                         bet_line = True
-                        
-        # Above checks for it line is a bet line
+
+        # Above checks for if line is a bet line
         #---------------------------------
         # Below saves bet data if it is a bet line
         #---------------------------------
         if (bet_line):
-            capper = name           #Same
-            date = date             #Same
-            time = time             #Same   
-            url = url               #Same
-            week = parse_week(date) #Same
+            if(containsNumbers(line)):
+                capper = name           #Same
+                date = date             #Same
+                time = time             #Same   
+                url = url               #Same
+                week = parse_week(date) #Same
 
-            #These variables will be independent to each bet line
-            league = parse_league(line)
-            bet_type = parse_bet_type(line)
-            units = parse_units(line)
-            odds = parse_odds(line)
-            result = parse_result(line, win_models, loss_models)           
-            unit_calc = parse_unit_calc(odds, units, result)  
-            line = emoji.demojize(line, delimiters=("", ""))
-            DB_Methods.save_parsed_bet_data(capper, league, week, date, time, bet_type, units, odds, result, unit_calc, url, line)
+                #These variables will be independent to each bet line
+                league = parse_league(line)
+                bet_type = parse_bet_type(line)
+                units = parse_units(line)
+                odds = parse_odds(line)
+                result = parse_result(line, win_models, loss_models)           
+                unit_calc = parse_unit_calc(odds, units, result)
+                DB_Methods.save_parsed_bet_data(capper, league, week, date, time, bet_type, units, odds, result, unit_calc, url, line)
     return
     
 def parse_league(text):
@@ -155,9 +177,23 @@ def parse_bet_type(text):
     return "ML"
 
 #Parse the units bet
-#TODO: Parse Units
 def parse_units(line):
-    return 1
+    try:
+        split = line.split(' ')
+        for snip in split:
+            temp_snip = snip.replace("(", "")
+            temp_snip = temp_snip.replace(")", "")
+            temp_snip = temp_snip.replace("+", "")
+            temp_snip = temp_snip.replace("-", "")
+
+            if(temp_snip[-1] == "u"):
+                if(temp_snip[:-1].isnumeric()):
+                    return temp_snip[:-1]
+        return 1
+    except:
+        print("There was a problem parsing units.")
+        return 1
+    
 
 #Parse the odds of the bet
 def parse_odds(text):
@@ -187,10 +223,16 @@ def parse_unit_calc(odds, units, result):
     if(result == "L"):
         return "-" + str(units)
     if(int(odds) < 0):
-        calc = -100/int(odds) * int(units)
+        calc = -100/int(odds) * units
     else:
-        calc = int(odds)/100 * int(units)
+        calc = int(odds)/100 * units
     return "+" + str(calc)
+
+def containsNumbers(value):
+    for character in value:
+        if character.isdigit():
+            return True
+    return False
 
 #TODO: Remove this eventually
 #Drop the tables for testing purposes

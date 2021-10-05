@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'tweet_crawler'
+    'tweet_crawler',
+    'admin_reorder'
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'admin_reorder.middleware.ModelAdminReorder',
 ]
 
 ROOT_URLCONF = 'cappers_collective.urls'
@@ -72,6 +74,46 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'cappers_collective.wsgi.application'
 
+ADMIN_REORDER = (
+    {'app': 'auth', 'label': 'Users/Groups'},
+
+   
+    {'app': 'tweet_crawler', 'label': 'Twitter Data',
+     'models': ({'model': 'tweet_crawler.twitter_users', 'label': 'Twitter Users'},
+     )},
+
+    {'app': 'tweet_crawler', 'label': 'Initial Crawl Data',
+     'models': ({'model': 'tweet_crawler.tweets_all', 'label': 'ALL Tweets'},
+                {'model': 'tweet_crawler.tweet_models', 'label': 'BET Tweet Models'},
+     )},
+
+    
+
+    {'app': 'tweet_crawler', 'label': 'Bet Tweet Data',
+     'models': ( {'model': 'tweet_crawler.tweets_bets', 'label': 'BET Tweets'},
+                 {'model': 'tweet_crawler.bet_line_models', 'label': 'BET Line Models'},
+               
+     )},
+
+    {'app': 'tweet_crawler', 'label': 'Win/Loss Models',
+     'models': ({'model': 'tweet_crawler.win_models', 'label': 'Win Models'},
+                {'model': 'tweet_crawler.loss_models', 'label': 'Loss Models'},
+     )},
+
+
+    {'app': 'tweet_crawler', 'label': 'League Models',
+     'models': ({'model': 'tweet_crawler.nfl_models', 'label': 'NFL Models'},
+                {'model': 'tweet_crawler.nba_models', 'label': 'NBA Models'},
+                {'model': 'tweet_crawler.mlb_models', 'label': 'MLB Models'},
+                {'model': 'tweet_crawler.nhl_models', 'label': 'NHL Models'},
+                {'model': 'tweet_crawler.ncaaf_models', 'label': 'NCAAF Models'},
+                {'model': 'tweet_crawler.ncaab_models', 'label': 'NCCAB Models'},
+     )
+    },
+    {'app': 'tweet_crawler', 'label': 'Final Data',
+     'models': ({'model': 'tweet_crawler.parsed_data', 'label': 'Final Tweet Data'},
+     )},
+)
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases

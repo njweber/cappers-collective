@@ -12,8 +12,8 @@ def main(request):
 def button_crawl_twitter(request):
    if not request.user.is_authenticated:
         return render(request, "../templates/admin/login.html", {})
-   tweet_functions.start_crawl()
-   return render(request, "../templates/admin/crawl.html", {})
+   report_list = tweet_functions.start_crawl()
+   return render(request, "../templates/admin/crawl.html", {'context': report_list})
    
 def crawl_twitter_output(request):
    data = "Success"

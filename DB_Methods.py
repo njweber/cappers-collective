@@ -77,8 +77,6 @@ def get_bet_line_models_by_user(user):
             models.append(row[2])
     return models 
 
-
-
 ## START LEAGUE DATABASE CHECKS
 
 def doesTextContainMLB(text):
