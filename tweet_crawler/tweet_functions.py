@@ -3,19 +3,26 @@
 import emoji
 import tweepy
 import time
+import re
 import Private
 import DB_Methods
 from dateutil import tz 
 from datetime import datetime
 from django.shortcuts import render
 
+#DONE: Removed any links (https://blahblah) from the bet line text
+#DONE: Refactored odds calucaltion to prevent odds of single or double digits.
+#DONE: Refactored over/under bet selection.
+#DONE: Continued work on unit parsing. Still need to figure out how to get units for blocks of bets set by bet header units.
+
+#TODO: Come up with solution for NCAA teams/league selection
+
 #TODO: Try to remove betlines that are junk. ON GOING!
-#DONE: If bet line doesnt contain numbers ignore it!
-#DONE: Allow models to be used for all users.
-#DONE: Draft up some documentation on how the application works.
 #TODO: Add reporting to crawl and send email with report details.
 #TODO: Look into adding junk lines to the bet lines. Would need to create an array of junk lines and add to end/start of bet line.
 #TODO: Look into excel archiving
+
+#TODO: come up with a format?
 
 #Crawls twitter for tweets. Saving to DB when tweet is a betting tweet. Also checks for duplicates.
 def start_crawl():
@@ -120,6 +127,7 @@ def parse_raw_text_bet_data(date, time, name, text, url, bet_line_models, win_mo
                 odds = parse_odds(line)
                 result = parse_result(line, win_models, loss_models)           
                 unit_calc = parse_unit_calc(odds, units, result)
+                line = re.sub(r'http\S+', '', line)
                 DB_Methods.save_parsed_bet_data(capper, league, week, date, time, bet_type, units, odds, result, unit_calc, url, line)
     return
     
@@ -138,6 +146,9 @@ def parse_league(text):
 
     if(DB_Methods.doesTextContainMLB(text)):
         return "MLB"
+    
+    if(DB_Methods.doesTextContainNHL(text)):
+        return "NHL"
     return "UNKNOWN" #If all else fails
 
 #Parse the week of the year.
@@ -159,6 +170,8 @@ def parse_bet_type(text):
         if( len(snip) > 1 ):    
             if((snip[0] == "U" or snip[0] == "O") and snip[1:].isnumeric()):
                 return "OU"  
+            if(snip.lower() == "over" or snip.lower() == "under"):
+                return "OU"
         
     #TODO: Parse player prop bets
     if(): 
@@ -185,9 +198,9 @@ def parse_units(line):
             temp_snip = temp_snip.replace(")", "")
             temp_snip = temp_snip.replace("+", "")
             temp_snip = temp_snip.replace("-", "")
-
-            if(temp_snip[-1] == "u"):
-                if(temp_snip[:-1].isnumeric()):
+            if(temp_snip[-1].lower() == "u"):
+                temp = temp_snip[:-1].replace('.','',1)
+                if(temp.isnumeric()):
                     return temp_snip[:-1]
         return 1
     except:
@@ -200,12 +213,13 @@ def parse_odds(text):
     split = text.split('+')
     for snip in split:
         if(snip[0:3].isnumeric()):
-            return "+" + snip[0:3]
-            
+            if(int(snip[0:3]) > 99 or int(snip[0:3]) < -99):
+                return "+" + snip[0:3]
     split = text.split('-')
     for snip in split:
         if(snip[0:3].isnumeric()):
-            return "-" + snip[0:3]
+            if(int(snip[0:3]) > 99 or int(snip[0:3]) < -99):
+                return "-" + snip[0:3]
     return -110
 
 #Parse the results
