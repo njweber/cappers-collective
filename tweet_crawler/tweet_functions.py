@@ -109,8 +109,9 @@ def parse_raw_text_bet_data(date, time, name, text, url, bet_line_models, win_mo
     lines = text.splitlines()       #Splits up raw text into seperate lines
     league_headers = check_league_header(lines)
     units_headers = check_units_header(lines)
-    line_number = 0
+    line_number = -1
     for line in lines:
+        line_number += 1
         if(len(lines) == 1):        #Only 1 line means that is the bet line
             bet_line = True
         else:                       #More than 1 line so potentially multiple bet lines
@@ -136,9 +137,9 @@ def parse_raw_text_bet_data(date, time, name, text, url, bet_line_models, win_mo
                 week = parse_week(date) #Same
 
                 #These variables will be independent to each bet line
-                league = parse_league(line, league_headers)
+                league = parse_league(line, league_headers, line_number)
                 bet_type = parse_bet_type(line)
-                units = parse_units(line, units_headers)
+                units = parse_units(line, units_headers, line_number)
                 odds = parse_odds(line)
                 result = parse_result(line, win_models, loss_models)          
                 unit_calc = parse_unit_calc(odds, units, result)
@@ -158,13 +159,13 @@ def check_league_header(lines):
             league_temp = league.lower()
             if league_temp in line_temp:
                 current_league = league_temp
-        league_line_data[line_number] = current_league
+        league_line_data[line_number] = current_league.upper()
     return league_line_data
     
 def check_units_header(lines):
     line_number = 0
     units_line_data = {}
-    current_units = ""
+    current_units = 0
     for line in lines:
         line_number+=1
         #If line contains units
@@ -172,7 +173,7 @@ def check_units_header(lines):
         units_line_data[line_number] = current_units
     return units_line_data
 
-def parse_league(text, league_headers):
+def parse_league(text, league_headers, line_number):
     if(DB_Methods.doesTextContainNBA(text)):
         return "NBA"
     if(DB_Methods.doesTextContainNCAAB(text)):
@@ -185,7 +186,7 @@ def parse_league(text, league_headers):
         return "MLB"
     if(DB_Methods.doesTextContainNHL(text)):
         return "NHL"
-    return "UNKNOWN" #If all else fails
+    return league_headers[line_number]
 
 #Parse the week of the year.
 def parse_week(date):
@@ -226,7 +227,7 @@ def parse_bet_type(text):
     return "ML"
 
 #Parse the units bet
-def parse_units(line, units_headers):
+def parse_units(line, units_headers, line_number):
     try:
         split = line.split(' ')
         for snip in split:
@@ -238,7 +239,7 @@ def parse_units(line, units_headers):
                 temp = temp_snip[:-1].replace('.','',1)
                 if(temp.isnumeric()):
                     return temp_snip[:-1]
-        return 1
+        return 1 #units_headers[line_number]
     except:
         print("There was a problem parsing units")
         return 1
