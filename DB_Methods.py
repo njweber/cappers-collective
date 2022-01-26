@@ -1,4 +1,7 @@
 import psycopg2
+import pandas as pd
+import os
+from sqlite3 import Error
 
 connect = psycopg2.connect(
     host="ec2-54-82-208-124.compute-1.amazonaws.com",
@@ -130,3 +133,16 @@ def drop_tables():
     cursor.execute("DELETE FROM parsed_data")
     connect.commit()
     return 1
+
+def export_to_excel():
+    week = 18 #Edit this to week we want to archive
+    query = "SELECT * FROM parsed_data WHERE week = " + str(week)
+    df = pd.read_sql(query, connect)
+    path = 'cappers_collective_parsed_data_week_' + str(week) + '.xlsx'
+    df.to_excel(path)
+    return 1
+
+    #Once we archive we want to clean out the DB of archived data
+    #cursor.execute("DELETE FROM parsed_data WHERE week = 33")
+    #connect.commit()
+

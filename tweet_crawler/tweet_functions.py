@@ -1,28 +1,32 @@
 # Finish Unit Parsing
-
+import psycopg2
 import emoji
 import tweepy
-import time
 import re
+import os
 import Private
 import DB_Methods
 from dateutil import tz 
 from datetime import datetime
 from django.shortcuts import render
 
-#DONE: Removed any links (https://blahblah) from the bet line text
-#DONE: Refactored odds calucaltion to prevent odds of single or double digits.
-#DONE: Refactored over/under bet selection.
-#DONE: Continued work on unit parsing. Still need to figure out how to get units for blocks of bets set by bet header units.
-
-#TODO: Come up with solution for NCAA teams/league selection
-
-#TODO: Try to remove betlines that are junk. ON GOING!
 #TODO: Add reporting to crawl and send email with report details.
 #TODO: Look into adding junk lines to the bet lines. Would need to create an array of junk lines and add to end/start of bet line.
-#TODO: Look into excel archiving
+#TODO: Odds with greater than 4 digits are not working.
 
-#TODO: come up with a format?
+# Potential Format
+# Anything separated by spaces or commas would work best.
+#
+##WITH HEADER##
+# LEAGUE - UNITS
+# Info/Team, Bet Type, Odds, Result
+# Info/Team, Bet Type, Odds, Result
+# Info/Team, Bet Type, Odds, Result
+#
+##WITHOUT HEADER##
+# League, Units, Bet Type, Odds, Result 
+#
+# A hashtag could be nice to be able to know which tweets are bet tweets
 
 #Crawls twitter for tweets. Saving to DB when tweet is a betting tweet. Also checks for duplicates.
 def start_crawl():
@@ -50,37 +54,44 @@ def start_crawl():
         bet_num = 0
         report_list[report_count].append(users[user_num])
         while (flag == False):
-            tweet = api.user_timeline(users[user_num], count=50, tweet_mode="extended")[tweet_num]
-            tweet_date = tweet.created_at
-            tweet_date = tweet_date.replace(tzinfo=tz.gettz('UTC'))
-            tweet_date = str(tweet_date.astimezone(tz.gettz('Eastern Time Zone')))[0 : 10]
-            today = str(datetime.today())[0 : 10]
-            if(tweet_date == today): #Tweet from today!
-                tweet_num = tweet_num + 1
-                date = tweet.created_at
-                time_date = date.replace(tzinfo=tz.gettz('UTC'))
-                time = time_date.astimezone(tz.gettz('Eastern Time Zone')).strftime("%I:%M:%S %p")
-                name = tweet.user.screen_name  
-                text = emoji.demojize(tweet.full_text, delimiters=("", ""))
-                url = "https://twitter.com/" + name + "/statuses/" + str(tweet.id)
-                status_id = tweet.id 
-                models = DB_Methods.get_bet_models_by_user(users[user_num]) + DB_Methods.get_bet_models_by_user("ALL_USERS")
-                bet_line_models = DB_Methods.get_bet_line_models_by_user(users[user_num]) + DB_Methods.get_bet_line_models_by_user("ALL_USERS")
-                win_models = DB_Methods.get_win_models_by_user(users[user_num]) + DB_Methods.get_win_models_by_user("ALL_USERS")
-                loss_models = DB_Methods.get_loss_models_by_user(users[user_num]) + DB_Methods.get_loss_models_by_user("ALL_USERS")
-                if(not DB_Methods.check_dupe_tweets(status_id)):
-                    DB_Methods.save_all_tweet(date, time, name, text, url, status_id)
-                    if(is_user_specific_bet(text, models)):
-                        bet_num = bet_num + 1
-                        DB_Methods.save_bet_tweet(date, time, name, text, url, status_id)
-                        parse_raw_text_bet_data(date, time, name, text, url, bet_line_models, win_models, loss_models)
-            else:
+            try:
+                tweet = api.user_timeline(users[user_num], count=50, tweet_mode="extended")[tweet_num]
+                tweet_date = tweet.created_at
+                tweet_date = tweet_date.replace(tzinfo=tz.gettz('UTC'))
+                tweet_date = str(tweet_date.astimezone(tz.gettz('Eastern Time Zone')))[0 : 10]
+                today = str(datetime.today())[0 : 10]
+                if(tweet_date == today): #Tweet from today!
+                    tweet_num = tweet_num + 1
+                    date = tweet.created_at
+                    time_date = date.replace(tzinfo=tz.gettz('UTC'))
+                    time = time_date.astimezone(tz.gettz('Eastern Time Zone')).strftime("%I:%M:%S %p")
+                    name = tweet.user.screen_name  
+                    text = emoji.demojize(tweet.full_text, delimiters=("", ""))
+                    url = "https://twitter.com/" + name + "/statuses/" + str(tweet.id)
+                    status_id = tweet.id 
+                    models = DB_Methods.get_bet_models_by_user(users[user_num]) + DB_Methods.get_bet_models_by_user("ALL_USERS")
+                    bet_line_models = DB_Methods.get_bet_line_models_by_user(users[user_num]) + DB_Methods.get_bet_line_models_by_user("ALL_USERS")
+                    win_models = DB_Methods.get_win_models_by_user(users[user_num]) + DB_Methods.get_win_models_by_user("ALL_USERS")
+                    loss_models = DB_Methods.get_loss_models_by_user(users[user_num]) + DB_Methods.get_loss_models_by_user("ALL_USERS")
+                    if(not DB_Methods.check_dupe_tweets(status_id)):
+                        DB_Methods.save_all_tweet(date, time, name, text, url, status_id)
+                        if(is_user_specific_bet(text, models)):
+                            bet_num = bet_num + 1
+                            DB_Methods.save_bet_tweet(date, time, name, text, url, status_id)
+                            parse_raw_text_bet_data(date, time, name, text, url, bet_line_models, win_models, loss_models)
+                else:
+                    tweet_num = 0
+                    flag = True #Not a tweet from today so go to next user  
+                    #report_list[report_count].append(tweet_num)
+                    #report_list[report_count].append(bet_num)
+                    report_count = report_count + 1
+            except:
                 tweet_num = 0
                 flag = True #Not a tweet from today so go to next user  
                 #report_list[report_count].append(tweet_num)
                 #report_list[report_count].append(bet_num)
                 report_count = report_count + 1
-    ##create_report(report_list)
+    #create_report(report_list)
     return report_list
 
 # Determines if the tweet is a bet tweet depending on user
@@ -96,6 +107,9 @@ def is_user_specific_bet(text, models):
 # Parse Raw Text Bet Data 
 def parse_raw_text_bet_data(date, time, name, text, url, bet_line_models, win_models, loss_models):
     lines = text.splitlines()       #Splits up raw text into seperate lines
+    league_headers = check_league_header(lines)
+    units_headers = check_units_header(lines)
+    line_number = 0
     for line in lines:
         if(len(lines) == 1):        #Only 1 line means that is the bet line
             bet_line = True
@@ -112,6 +126,7 @@ def parse_raw_text_bet_data(date, time, name, text, url, bet_line_models, win_mo
         #---------------------------------
         # Below saves bet data if it is a bet line
         #---------------------------------
+        
         if (bet_line):
             if(containsNumbers(line)):
                 capper = name           #Same
@@ -121,32 +136,53 @@ def parse_raw_text_bet_data(date, time, name, text, url, bet_line_models, win_mo
                 week = parse_week(date) #Same
 
                 #These variables will be independent to each bet line
-                league = parse_league(line)
+                league = parse_league(line, league_headers)
                 bet_type = parse_bet_type(line)
-                units = parse_units(line)
+                units = parse_units(line, units_headers)
                 odds = parse_odds(line)
-                result = parse_result(line, win_models, loss_models)           
+                result = parse_result(line, win_models, loss_models)          
                 unit_calc = parse_unit_calc(odds, units, result)
                 line = re.sub(r'http\S+', '', line)
                 DB_Methods.save_parsed_bet_data(capper, league, week, date, time, bet_type, units, odds, result, unit_calc, url, line)
     return
+
+def check_league_header(lines):
+    league_list = ["NFL", "NBA", "NHL", "MLB", "NCAAB", "NCAAF"]
+    line_number = 0
+    league_line_data = {}
+    current_league = ""
+    for line in lines:
+        line_number+=1
+        for league in league_list:
+            line_temp = line.lower()
+            league_temp = league.lower()
+            if league_temp in line_temp:
+                current_league = league_temp
+        league_line_data[line_number] = current_league
+    return league_line_data
     
-def parse_league(text):
+def check_units_header(lines):
+    line_number = 0
+    units_line_data = {}
+    current_units = ""
+    for line in lines:
+        line_number+=1
+        #If line contains units
+            #current_units = found_units
+        units_line_data[line_number] = current_units
+    return units_line_data
+
+def parse_league(text, league_headers):
     if(DB_Methods.doesTextContainNBA(text)):
         return "NBA"
-
     if(DB_Methods.doesTextContainNCAAB(text)):
         return "NCAAB"
-
     if(DB_Methods.doesTextContainNFL(text)):
         return "NFL"
-
     if(DB_Methods.doesTextContainNCAAF(text)):
         return "NCAAF"
-
     if(DB_Methods.doesTextContainMLB(text)):
         return "MLB"
-    
     if(DB_Methods.doesTextContainNHL(text)):
         return "NHL"
     return "UNKNOWN" #If all else fails
@@ -190,7 +226,7 @@ def parse_bet_type(text):
     return "ML"
 
 #Parse the units bet
-def parse_units(line):
+def parse_units(line, units_headers):
     try:
         split = line.split(' ')
         for snip in split:
@@ -237,9 +273,10 @@ def parse_unit_calc(odds, units, result):
     if(result == "L"):
         return "-" + str(units)
     if(int(odds) < 0):
-        calc = -100/int(odds) * units
+        temp = -100/int(odds)
+        calc =  temp * float(units)
     else:
-        calc = int(odds)/100 * units
+        calc = float(int(odds)/100) * float(units)
     return "+" + str(calc)
 
 def containsNumbers(value):
@@ -251,4 +288,5 @@ def containsNumbers(value):
 #TODO: Remove this eventually
 #Drop the tables for testing purposes
 def drop_tables():
-    DB_Methods.drop_tables()
+    #DB_Methods.drop_tables()
+    DB_Methods.export_to_excel()
