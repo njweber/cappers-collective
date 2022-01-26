@@ -240,7 +240,7 @@ def parse_units(line, units_headers):
                     return temp_snip[:-1]
         return 1
     except:
-        print("There was a problem parsing units.")
+        print("There was a problem parsing units")
         return 1
     
 
@@ -276,7 +276,7 @@ def parse_unit_calc(odds, units, result):
         temp = -100/int(odds)
         calc =  temp * float(units)
     else:
-        calc = float(int(odds)/100) * float(units)
+        calc = float(int(odds)/100) * float(units) 
     return "+" + str(calc)
 
 def containsNumbers(value):
