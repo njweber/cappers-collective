@@ -10,7 +10,7 @@ from dateutil import tz
 from datetime import datetime
 from django.shortcuts import render
 
-#TODO: Add reporting to crawl and send email with report details.
+#TODO: Add reporting to  crawl and send email with report details.
 #TODO: Look into adding junk lines to the bet lines. Would need to create an array of junk lines and add to end/start of bet line.
 #TODO: Odds with greater than 4 digits are not working.
 
