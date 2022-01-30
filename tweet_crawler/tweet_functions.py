@@ -289,5 +289,6 @@ def containsNumbers(value):
 #TODO: Remove this eventually
 #Drop the tables for testing purposes
 def drop_tables():
+    return
     #DB_Methods.drop_tables()
     #DB_Methods.export_to_excel()
