@@ -290,4 +290,4 @@ def containsNumbers(value):
 #Drop the tables for testing purposes
 def drop_tables():
     #DB_Methods.drop_tables()
-    DB_Methods.export_to_excel()
+    #DB_Methods.export_to_excel()
